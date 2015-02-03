@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>FYP</title>
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+	<link href="{{url_for('static', filename='style.css')}}" rel="stylesheet">
+</head>
+<body>
+	{% include 'nav.html' %}
+
+	<div class="jumbotron" style="margin-top:50px;">
+		<div class="container">Hello</div>
+	</div>
+
+	<div class="container">
+		<div class="well">
+			{% block content %}{% endblock %}
+		</div>
+		<div class="well">
+			{{session}}
+		</div>
+	</div>
+
+	<script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</body>
+</html>

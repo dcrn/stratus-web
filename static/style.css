@@ -1,0 +1,11 @@
+.userbox {
+	border: 1px solid #222;
+	border-radius: 4px;
+	padding: 1px;
+	padding-right: 4px;
+	background-color: #eee;
+}
+
+.userbox > img {
+	border-radius: 4px;
+}

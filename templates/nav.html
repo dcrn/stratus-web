@@ -1,0 +1,30 @@
+<nav class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">FYP</a>
+		</div>
+		<div id="navbar" class="navbar-collapse collapse">
+	 		<div class="navbar-right navbar-form">
+				{% if 'access_token' in session %}
+					<div class="userbox">
+					<img src="{{ session['user_info']['avatar_url'] }}&amp;s=30" alt=""> 
+					{{ session['user_info']['name'] }} 
+					<a href="/logout">logout</a>
+					</div>
+				{% else %}
+					<form action="https://github.com/login/oauth/authorize" method="get">
+						<button type="submit" class="btn btn-default">Log in with GitHub</button>
+						<input type="hidden" name="scope" value="{{config.GITHUB_SCOPES}}"/>
+						<input type="hidden" name="client_id" value="{{config.GITHUB_CLIENT_ID}}"/>
+					</form>
+				{% endif %}
+			</div>
+		</div><!--/.navbar-collapse -->
+	</div>
+</nav>
