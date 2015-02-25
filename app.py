@@ -67,5 +67,17 @@ def logout():
 	session.clear()
 	return redirect(url_for('index'))
 
+@app.route('/editor/<repo>')
+def editor(repo):
+	if 'access_token' in session:
+		return render_template('editor.html')
+	else:
+		return redirect(url_for('index'))
+
+@app.route('/game/<user>/<repo>')
+def game(user, repo):
+	return render_template('game.html', gamedata='', components=[])
+
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=True);

@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+	<title>Editor</title>
+	<style>
+		body, html {margin: 0; height: 100%; overflow: hidden; line-height: 0px;}
+		canvas {width: 100%; height: 100%;}
+		.nav-tabs>li { height: 26px; line-height: 0.4em !important; }
+		.nav-tabs>li>a { height: 26px; line-height: 0.4em !important; }
+		#explorer {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 80%;
+			bottom: 0;
+			border: 1px solid lightgray;
+		}
+
+		#main {
+			position: relative;
+			top: 0;
+			left: 20%;
+			right: 0;
+			bottom: 0;
+			height: 100%;
+		}
+
+		.properties {
+			position: absolute;
+			top: 0;
+			left: 60%;
+			bottom: 0;
+			right: 0;
+			height: 100%;
+			border: 1px solid lightgray;
+			border-top: 0px;
+		}
+
+		.tab-content {
+			height: 100%;
+		}
+
+		.tab-pane {
+			position: relative;
+			height: 100%;
+		}
+
+		#sceneEditor {
+			position: absolute;
+			top: 0;
+			width: 60%;
+			left: 0;
+			bottom: 0;
+		}
+
+		#sceneEditor > canvas {
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+	<div id="explorer">
+		<ul>
+			<li>Scene</li>
+			<ul>
+				<li>&nbsp;Entity</li>
+				<ul>
+					<li>&nbsp;&nbsp;Component</li>
+				</ul>
+			</ul>
+		</ul>
+	</div>
+	<div id="main">
+		<div role="tabpanel">
+			<ul class="nav nav-tabs" role="tablist">
+				<li role="presentation" class="active">
+					<a href="#sceneEditorPanel" aria-controls="sceneEditorPanel" role="tab" data-toggle="tab">Scene Editor</a>
+				</li>
+				<li role="presentation">
+					<a href="#phys" aria-controls="phys" role="tab" data-toggle="tab">Script: phys.js</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="tab-content">
+			<div role="tabpanel" class="relative tab-pane active" id="sceneEditorPanel">
+				<div id="sceneEditor">
+				</div>
+				<div class="properties">
+					Component settings
+				</div>
+			</div>
+			<div role="tabpanel" class="relative tab-pane" id="phys">
+				<div id="editor" style="height: 100px; width: 100px">some text</div>
+			</div>
+			<div role="tabpanel" class="relative tab-pane" id="Git">...</div>
+		</div>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+	<script src="{{url_for('static', filename='lib/ace/ace.js')}}"></script>
+	<script src="{{url_for('static', filename='editor.js')}}"></script>
+
+	<div id="das" style="height: 500px; width: 500px">some text</div>
+	
+	<script>
+	    var editor = ace.edit("ace_editor");
+	    Editor.init();
+	    Editor.start();
+	</script>
+	<!--<script src="lib/ammo.js"></script>-->
+	<!--<script src="game.js"></script>-->
+	<!--<script src="scene.js"></script>-->
+	<!--<script src="entity.js"></script>-->
+	<!--<script src="components/physics.js"></script>-->
+	<!--<script src="components/transform.js"></script>-->
+	<!--<script src="components/light.js"></script>-->
+	<!--<script src="components/camera.js"></script>-->
+	<!--<script src="components/mesh.js"></script>-->
+	<!--<script src="components/flycontroller.js"></script>-->
+	<!--<script src="components/fpscontroller.js"></script>-->
+</body>
