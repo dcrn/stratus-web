@@ -1,11 +1,37 @@
+body {
+	background-color: #fff;
+}
+
+#navfix {
+	height: 64px;
+	display: block;
+}
+
+.jumbotron {
+	color: #222;
+	border: 1px solid #ddd;
+	margin-top: -20px;
+	padding: 20px;
+	background-color: #f8f8f8;
+}
+
+.jumbotron img {
+	border: 1px solid #222;
+	border-radius: 6px;
+}
+
 .userbox {
 	border: 1px solid #222;
 	border-radius: 4px;
 	padding: 1px;
 	padding-right: 4px;
-	background-color: #eee;
+	background-color: #fff;
 }
 
 .userbox > img {
 	border-radius: 4px;
+}
+
+.gameicon {
+	display: inline-block;
 }

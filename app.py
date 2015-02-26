@@ -67,16 +67,26 @@ def logout():
 	session.clear()
 	return redirect(url_for('index'))
 
+@app.route('/projects')
+def projects():
+	if 'access_token' in session:
+		return render_template('projects.html')
+	else:
+		return error(403, 'Forbidden')
+
 @app.route('/editor/<repo>')
 def editor(repo):
 	if 'access_token' in session:
 		return render_template('editor.html')
 	else:
-		return redirect(url_for('index'))
+		return error(403, 'Forbidden')
 
 @app.route('/game/<user>/<repo>')
 def game(user, repo):
-	return render_template('game.html', gamedata='', components=[])
+	if 'access_token' in session and session['user_info']['login'] == user:
+		return render_template('game.html', gamedata='{}', components=[])
+	else:
+		return error(403, 'Forbidden')
 
 
 if __name__ == '__main__':
