@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-	<h1>Error {{error.code}}</h1>
-	<p>{{error.message}}</p>
+	<div class="page-header">
+	<h1>Error {{error.code}} <small>{{error.message}}</small></h1>
+	</div>
 {% endblock %}

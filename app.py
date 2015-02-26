@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, url_for, jsonify, render_template, session, g
 from github import GitHub
+from storage import Storage
 import time
 
 app = Flask(__name__)
@@ -24,8 +25,15 @@ def before_req():
 		'github.com/dcrn/fyp'
 	)
 
-	if 'access_token' in session and \
-		(time.time() - session.get('last_visit', 0)) > app.config.get('ACCESS_TOKEN_UPDATE_TIME'):
+	# Set up Storage API
+	g.storage = Storage(
+		app.config.get('STORAGE_ADDR'),
+		app.config.get('STORAGE_PORT')
+	)
+
+	if ('access_token' in session and
+		(time.time() - session.get('last_visit', 0)) > 
+		app.config.get('ACCESS_TOKEN_UPDATE_TIME')):
 
 		# Validate the user's access token
 		status, resuser = g.github.get_user(session.get('access_token'))
@@ -83,8 +91,14 @@ def editor(repo):
 
 @app.route('/game/<user>/<repo>')
 def game(user, repo):
-	if 'access_token' in session and session['user_info']['login'] == user:
-		return render_template('game.html', gamedata='{}', components=[])
+	if ('access_token' in session and
+		session['user_info']['login'] == user):
+
+		if (g.storage.repo_exists(user, repo)):
+			gamedata, components = g.storage.get_game_files(user, repo)
+			return render_template('game.html', gamedata=gamedata, components=components)
+		else:
+			return error(404, 'Not Found')
 	else:
 		return error(403, 'Forbidden')
 
