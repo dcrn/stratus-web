@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, jsonify, render_template, session, g
 from github import GitHub
 from storage import Storage
-import time
+import time, json
 
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
@@ -84,8 +84,22 @@ def projects():
 
 @app.route('/editor/<repo>')
 def editor(repo):
-	if 'access_token' in session:
-		return render_template('editor.html')
+	if ('access_token' in session):
+		user = session['user_info']['login']
+		if (g.storage.repo_exists(user, repo)):
+			gamedata, components = g.storage.get_game_files(user, repo)
+			tree = g.storage.get_tree(user, repo)
+			if not gamedata or not tree:
+				return error(404, 'Not Found')
+
+			return render_template(
+				'editor.html', 
+				gamedata=gamedata, 
+				components=components,
+				tree=json.dumps(tree)
+			)
+		else:
+			return error(404, 'Not Found')
 	else:
 		return error(403, 'Forbidden')
 
@@ -96,7 +110,14 @@ def game(user, repo):
 
 		if (g.storage.repo_exists(user, repo)):
 			gamedata, components = g.storage.get_game_files(user, repo)
-			return render_template('game.html', gamedata=gamedata, components=components)
+			if not gamedata:
+				return error(404, 'Not Found')
+
+			return render_template(
+				'game.html', 
+				gamedata=gamedata, 
+				components=components
+			)
 		else:
 			return error(404, 'Not Found')
 	else:

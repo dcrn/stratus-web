@@ -14,13 +14,15 @@ Editor.init = function() {
 Editor.updateCamera = function() {
 	var w = $('#sceneEditor').width();
 	var h = $('#sceneEditor').height();
+
+	this.renderer.setSize(w, h);
 	this.camera.aspect = w / h;
 
 	this.invalidate();
 }
 
-Editor.load = function(url) {
-	
+Editor.load = function(gamedata) {
+	this.gamedata = gamedata;
 }
 
 Editor.invalidate = function() {
@@ -50,4 +52,28 @@ Editor.start = function() {
 
 Editor.setActiveScene = function(s) {
 	this.activeScene = s;
+}
+
+Editor.selectScene = function(s) {
+
+}
+
+Editor.selectEntity = function(s, e) {
+
+}
+
+Editor.selectComponent = function(s, e, c) {
+
+}
+
+Editor.updateSceneList = function() {
+
+}
+
+Editor.updateComponentList = function() {
+
+}
+
+Editor.updatePropertiesList = function() {
+
 }

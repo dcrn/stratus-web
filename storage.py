@@ -18,6 +18,14 @@ class Storage:
 		
 		return stat == 200
 
+	def get_tree(self, user, repo):
+		stat, re = self.call('/' + user + '/' + repo + '/tree', 'GET')
+
+		if stat != 200:
+			return False
+		j = json.loads(str(re.read(), 'utf-8'))
+		return j
+
 	def get_game_files(self, user, repo):
 		baseurl = '/' + user + '/' + repo + '/'
 

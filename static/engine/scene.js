@@ -52,6 +52,7 @@ Scene.prototype.activate = function() {
 Scene.prototype.add = function(entid, ent) {
 	this.entities[entid] = ent;
 	ent.scene = this;
+	ent.id = entid;
 
 	var comps = ent.components();
 	for (c in comps) {

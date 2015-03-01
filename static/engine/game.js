@@ -14,64 +14,79 @@ Game.init = function() {
 	this.renderer.setSize(window.innerWidth, window.innerHeight);
 	this.aspectRatio = window.innerWidth / window.innerHeight;
 	document.body.appendChild(this.renderer.domElement);
-
-	this.stats = new Stats();
-	this.stats.setMode(0);
-	this.stats.domElement.style.position = 'absolute';
-	this.stats.domElement.style.left = '0px';
-	this.stats.domElement.style.top = '0px';
-
-	document.body.appendChild(this.stats.domElement);
 }
 
-Game.loadJSON = function(json_id) {
-	var obj, scn, scid, opt, entid, ent, compid, com;
-	try {
-		obj = JSON.parse(document.getElementById(json_id).innerHTML);
+Game.loadScene = function(json) {
+	var opt = {}, scene, ent;
+
+	if(json.config)
+		opt = this.loadOptions(json.config);
+
+	scene = new Scene(opt);
+
+	for (entid in json.entities) {
+		ent = this.loadEntity(json.entities[entid]);
+
+		scene.add(
+			entid, 
+			ent
+		);
 	}
-	catch (e) {
-		console.log(e);
-		console.log('Game data is corrupt');
-		return false;
+
+	return scene;
+}
+
+Game.loadEntity = function(json) {
+	var entity = new Entity(), opt, com;
+
+	for (comid in json) {
+		opt = this.loadOptions(json[comid]);
+		com = Components.create(comid, opt);
+		entity.add(com);
 	}
 
-	this.scenes = {};
-	if (obj.scenes) {
-		for (scid in obj.scenes) {
-			if (obj.scenes[scid].config)
-				opt = this.convertJSONProperties(
-					obj.scenes[scid].config
-				);
-			else
-				opt = {}
+	return entity;
+}
 
-			scn = new Scene(opt);
-			this.scenes[scid] = scn;
+Game.loadOptions = function(json) {
+	var options = {}, v, i;
 
-			// Create entities
-			if (obj.scenes[scid].entities) {
-				for (entid in obj.scenes[scid].entities) {
-					ent = new Entity();
-					ent.id = entid;
+	for (i in json) {
+		v = json[i];
 
-					for(compid in obj.scenes[scid].entities[entid]) {
-						com = Components.create(
-							compid,
-							this.convertJSONProperties(
-								obj.scenes[scid].entities[entid][compid]
-							)
-						);
-						ent.add(com);
-					}
-					scn.add(entid, ent);
-				}
-			}
+		if (typeof v === 'object' && v.type === 'vector') {
+			options[i] = new Vector3(
+				v.parameters[0],
+				v.parameters[1],
+				v.parameters[2]);
+		}
+		else if (typeof v === 'object' && v.type === 'quaternion') {
+			options[i] = new Quaternion(
+				v.parameters[0],
+				v.parameters[1],
+				v.parameters[2],
+				v.parameters[3]);
+		}
+		else {
+			options[i] = v;
 		}
 	}
 
-	// Global Game config
-	if (obj.config) {
-		var config = this.convertJSONProperties(obj.config);
+	return options;
+}
+
+Game.load = function(json) {
+	var scn, scid, opt, entid, ent, compid, com;
+
+	this.scenes = {};
+	if (json.scenes) {
+		for (scid in json.scenes) {
+			this.scenes[scid] = this.loadScene(json.scenes[scid]);
+		}
+	}
+
+	if (json.config) {
+		var config = this.convertJSONProperties(json.config);
 
 		if ('shadowMapEnabled' in config)
 			this.setShadowMapEnabled(config.shadowMapEnabled);
@@ -95,57 +110,30 @@ Game.loadJSON = function(json_id) {
 			this.setClearColour(config.clearColour);
 		if ('pointerLockEnabled' in config)
 			this.setPointerLockEnabled(config.pointerLockEnabled);
-	}
-	
-	if (obj.scenes) {
 		if ('defaultSceneID' in config)
-			this.scenes[
-				config.defaultSceneID
-			].activate();
-		else
-			this.scenes[
-				Object.keys(this.scenes)[0]
-			].activate();
-	}
-}
-
-Game.convertJSONProperties = function(obj) {
-	var v, i;
-	for (i in obj) {
-		v = obj[i];
-		if (typeof v === 'object') {
-			if (v.type === 'vector') {
-				obj[i] = new Vector3(
-					v.parameters[0],
-					v.parameters[1],
-					v.parameters[2]);
-			}
-			else if (v.type === 'quaternion') {
-				obj[i] = new Quaternion();(
-					v.parameters[0],
-					v.parameters[1],
-					v.parameters[2],
-					v.parameters[3]);
-			}
-		}
+			this.scenes[config.defaultSceneID].activate();
 	}
 
-	return obj;
+	return this.scenes;
 }
 
 Game.start = function() {
 	var self = this;
 
+	if (!this.getActiveScene()) {
+		var k = Object.keys(this.scenes);
+		if (k.length > 0)
+			this.scenes[k[0]].activate();
+	}
+
 	this.lasttime = 0;
 	function update(now) {
 		requestAnimationFrame(update);
-		self.stats.begin();
-			var dt = (now - self.lasttime) / 1000;
-			self.lasttime = now;
+		var dt = (now - self.lasttime) / 1000;
+		self.lasttime = now;
 
-			if (self.activeScene)
-				self.activeScene.update(dt);
-		self.stats.end();
+		if (self.activeScene)
+			self.activeScene.update(dt);
 
 		if (self.activeScene && self.activeCamera)
 			self.renderer.render(
@@ -177,6 +165,10 @@ Game.getSceneByID = function(sid) {
 
 Game.setActiveScene = function(s) {
 	this.activeScene = s;
+}
+
+Game.getActiveScene = function(s) {
+	return this.activeScene;
 }
 
 Game.setActiveCamera = function(c) {
