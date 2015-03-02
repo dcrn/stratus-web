@@ -20,8 +20,8 @@ LightComponent = function(options) {
 		options.shadowCameraNear = 0.1;
 	if (!('shadowCameraFar' in options))
 		options.shadowCameraFar = 1000.0;
-	if (!('shadowCameraFOV' in options))
-		options.shadowCameraFOV = 75;
+	if (!('shadowCameraFov' in options))
+		options.shadowCameraFov = 75;
 	if (!('shadowCameraVisible' in options))
 		options.shadowCameraVisible = false;
 
@@ -44,7 +44,7 @@ LightComponent = function(options) {
 	this.setShadowDarkness(options.shadowDarkness);
 	this.setShadowCameraNear(options.shadowCameraNear);
 	this.setShadowCameraFar(options.shadowCameraFar);
-	this.setShadowCameraFOV(options.shadowCameraFOV);
+	this.setShadowCameraFov(options.shadowCameraFov);
 	this.setShadowCameraVisible(options.shadowCameraVisible);
 }
 
@@ -128,12 +128,12 @@ LightComponent.prototype.setShadowCameraFar = function(v) {
 	this.threeobj.shadowCameraFar = v;
 }
 
-LightComponent.prototype.getShadowCameraFOV = function() {
-	return this.threeobj.shadowCameraFOV;
+LightComponent.prototype.getShadowCameraFov = function() {
+	return this.threeobj.shadowCameraFov;
 }
 
-LightComponent.prototype.setShadowCameraFOV = function(v) {
-	this.threeobj.shadowCameraFOV = v;
+LightComponent.prototype.setShadowCameraFov = function(v) {
+	this.threeobj.shadowCameraFov = v;
 }
 
 LightComponent.prototype.getShadowCameraVisible = function() {
@@ -144,4 +144,17 @@ LightComponent.prototype.setShadowCameraVisible = function(v) {
 	this.threeobj.shadowCameraVisible = v;
 }
 
-Components.register('light', LightComponent);
+Components.register('light', LightComponent, {
+	type: ['point', 'spotlight', 'directional', 'ambient'],
+	colour: 'colour',
+	intensity: 'scalar',
+	distance: 'number',
+	angle: 'number',
+	exponent: 'number',
+	castShadow: 'bool',
+	shadowDarkness: 'scalar',
+	shadowCameraNear: 'number',
+	shadowCameraFar: 'number',
+	shadowCameraFov: 'number',
+	shadowCameraVisible: 'bool'
+});

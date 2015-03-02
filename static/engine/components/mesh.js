@@ -90,4 +90,10 @@ MeshComponent.prototype.setReceiveShadow = function(b) {
 	this.threeobj.receiveShadow = b;
 }
 
-Components.register('mesh', MeshComponent);
+Components.register('mesh', MeshComponent, {
+	shape: ['box', 'sphere', 'cylinder', 'plane'],
+	castShadow: 'bool',
+	receiveShadow: 'bool',
+	materialType: ['phong', 'lambert', 'basic'],
+	materialColour: 'colour'
+});

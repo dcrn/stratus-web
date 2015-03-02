@@ -2,89 +2,39 @@
 <html>
 <head>
 	<title>Editor</title>
-	<style>
-		body, html {margin: 0; height: 100%; overflow: hidden; line-height: 0px;}
-		canvas {width: 100%; height: 100%;}
-		.nav-tabs>li { height: 26px; line-height: 0.4em !important; }
-		.nav-tabs>li>a { height: 26px; line-height: 0.4em !important; }
-		#explorer {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 80%;
-			bottom: 0;
-			border: 1px solid lightgray;
-		}
-
-		#main {
-			position: relative;
-			top: 0;
-			left: 20%;
-			right: 0;
-			bottom: 0;
-			height: 100%;
-		}
-
-		.properties {
-			position: absolute;
-			top: 0;
-			left: 60%;
-			bottom: 0;
-			right: 0;
-			height: 100%;
-			border: 1px solid lightgray;
-			border-top: 0px;
-		}
-
-		.tab-content {
-			height: 100%;
-		}
-
-		.tab-pane {
-			position: relative;
-			height: 100%;
-		}
-
-		#sceneEditor {
-			position: absolute;
-			top: 0;
-			width: 60%;
-			left: 0;
-			bottom: 0;
-		}
-
-		#sceneEditor > canvas {
-			width: 100%;
-			height: 100%;
-		}
-
-		#texteditor {
-			width: 100%;
-			height: 100%;
-		}
-	</style>
+	<link href="{{url_for('static', filename='editor.css')}}" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-	<div id="explorer">
-		<ul>
-			<li>Scene</li>
-			<ul>
-				<li>&nbsp;Entity</li>
-				<ul>
-					<li>&nbsp;&nbsp;Component</li>
-				</ul>
+	<div id="sidebar">
+		<div role="tabpanel">
+			<ul class="nav nav-tabs" role="tablist">
+				<li role="presentation" class="active">
+					<a data-target="#explorer" aria-controls="explorer" role="tab" data-toggle="tab">Explorer</a>
+				</li>
+				<li role="presentation">
+					<a data-target="#components" aria-controls="components" role="tab" data-toggle="tab">Components</a>
+				</li>
 			</ul>
-		</ul>
+		</div>
+
+		<div class="tab-content">
+			<div role="tabpanel" class="relative tab-pane active" id="explorer">
+
+			</div>
+			<div role="tabpanel" class="relative tab-pane" id="components">
+
+			</div>
+		</div>
 	</div>
 	<div id="main">
 		<div role="tabpanel">
 			<ul class="nav nav-tabs" role="tablist">
 				<li role="presentation" class="active">
-					<a href="#sceneEditorPanel" aria-controls="sceneEditorPanel" role="tab" data-toggle="tab">Scene Editor</a>
+					<a data-target="#sceneEditorPanel" aria-controls="sceneEditorPanel" role="tab" data-toggle="tab">Scene Editor</a>
 				</li>
 				<li role="presentation">
-					<a href="#phys" aria-controls="phys" role="tab" data-toggle="tab">Script: phys.js</a>
+					<a data-target="#phys" aria-controls="phys" role="tab" data-toggle="tab">Script: phys.js</a>
 				</li>
 			</ul>
 		</div>
@@ -103,6 +53,7 @@
 		</div>
 	</div>
 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.0/handlebars.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script src="{{url_for('static', filename='lib/ace/ace.js')}}"></script>
@@ -120,9 +71,43 @@
 	<script type="application/json" id="treedata">
 		{{tree|safe}}
 	</script>
+
+	<script type="text/html" id="explorer_template">
+		{% raw %}
+		<ul>
+			{{#each scenes}}
+			<li class="explorer_item exp_scene" data-type="scene" data-id="{{@key}}">
+				<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-folder-open"></span></button>
+				<span class="glyphicon glyphicon-picture"></span>
+				{{@key}}
+				<ul>
+					{{#each this.entities}}
+					<li class="explorer_item exp_entity" data-type="entity" data-scene="{{@../key}}" data-id="{{@key}}">
+						<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-folder-close"></span></button>
+						<span class="glyphicon glyphicon-tree-deciduous"></span>
+						{{@key}}
+						<ul style="display:none;">
+							{{#each this}}
+							<li class="explorer_item exp_component" data-type="component" data-scene="{{@../../key}}" data-entity="{{@../key}}" data-id="{{@key}}">
+								<span class="glyphicon glyphicon-file"></span>
+								{{@key}}
+							</li>
+							{{/each}}
+						</ul>
+					</li>
+					{{/each}}
+				</ul>
+			</li>
+			{{/each}}
+		</ul>
+		{% endraw %}
+	</script>
 	
 	<script>
-	    var editor = ace.edit("texteditor");
+	    var texteditor = ace.edit("texteditor");
+	    //texteditor.setTheme("ace/theme/monokai");
+		texteditor.getSession().setMode("ace/mode/javascript");
+
 	    Editor.init();
 
 		var json;

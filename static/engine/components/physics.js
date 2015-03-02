@@ -217,4 +217,11 @@ PhysicsComponent.prototype.setAngularVelocity = function(v) {
 	this.ammoobj.setAngularVelocity(this.three2bt(v));
 }
 
-Components.register('physics', PhysicsComponent);
+Components.register('physics', PhysicsComponent, {
+	shape: ['box', 'sphere', 'cylinder'],
+	mass: 'number',
+	friction: 'scalar',
+	damping: 'scalar',
+	angularDamping: 'scalar',
+	restitution: 'scalar'
+});

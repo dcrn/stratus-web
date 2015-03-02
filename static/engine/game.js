@@ -85,8 +85,9 @@ Game.load = function(json) {
 		}
 	}
 
-	if (json.config) {
-		var config = this.convertJSONProperties(json.config);
+	// Have config and initialized
+	if (json.config && this.renderer) {
+		var config = this.loadOptions(json.config);
 
 		if ('shadowMapEnabled' in config)
 			this.setShadowMapEnabled(config.shadowMapEnabled);

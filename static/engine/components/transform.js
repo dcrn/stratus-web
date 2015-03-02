@@ -66,4 +66,8 @@ TransformComponent.prototype.setScale = function(v) {
 		this._scale.copy(v);
 }
 
-Components.register('transform', TransformComponent);
+Components.register('transform', TransformComponent, {
+	position: 'vector',
+	scale: 'vector',
+	rotation: 'quaternion'
+});

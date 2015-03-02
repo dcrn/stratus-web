@@ -1,1 +1,105 @@
+body, html {margin: 0; height: 100%; overflow: hidden; line-height: 0px;}
+.nav-tabs>li { height: 26px; line-height: 0.4em !important; }
+.nav-tabs>li>a { height: 26px; line-height: 0.4em !important; }
+#sidebar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 80%;
+	bottom: 0;
+	border-right: 1px solid lightgray;
+	overflow: auto;
+}
 
+#main {
+	position: relative;
+	top: 0;
+	left: 20%;
+	right: 0;
+	bottom: 0;
+	height: 100%;
+}
+
+.properties {
+	position: absolute;
+	top: 0;
+	left: 60%;
+	bottom: 0;
+	right: 0;
+	height: 100%;
+	border: 1px solid lightgray;
+	border-top: 0px;
+}
+
+#main .tab-content {
+	height: 100%;
+}
+
+.tab-pane {
+	position: relative;
+	height: 100%;
+}
+
+a[role=tab]:hover {
+	cursor: pointer;
+}
+
+#sceneEditor {
+	position: absolute;
+	top: 0;
+	width: 60%;
+	left: 0;
+	bottom: 0;
+}
+
+#sceneEditor > canvas {
+	width: 100%;
+	height: 100%;
+}
+
+#texteditor {
+	width: 100%;
+	height: 100%;
+}
+
+#explorer ul {
+	border-top: 1px solid #eee;
+	padding-left: 0px;
+}
+
+#explorer > ul:first-child {
+	border-top: 0px;
+}
+
+#explorer ul > li:last-child {
+	border-bottom: 0px;
+}
+
+.explorer_item {
+	display: block;
+	border-bottom: 1px solid #eee;
+}
+
+.explorer_item:hover {
+	cursor: default;
+}
+
+.explorer_item span {
+	text-indent: 0px;
+}
+
+.exp_scene {
+	text-indent: 4px;
+}
+
+.exp_entity {
+	text-indent: 18px;
+}
+
+.exp_component {
+	text-indent: 36px;
+}
+
+a.listtoggle:hover {
+	cursor: pointer;
+}

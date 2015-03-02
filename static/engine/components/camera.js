@@ -1,7 +1,6 @@
 CameraComponent = function(options) {
 	options = options || {};
 	options.fov = options.fov || 75;
-	options.aspectRatio = options.aspectRatio || 16/9;
 	options.near = options.near || 0.1;
 	options.far = options.far || 1000.0;
 
@@ -9,7 +8,6 @@ CameraComponent = function(options) {
 	this.threeobj.up.set(0, 0, 1);
 
 	this.setFov(options.fov, true);
-	this.setAspectRatio(options.aspectRatio, true);
 	this.setNear(options.near, true);
 	this.setFar(options.far, true);
 
@@ -72,4 +70,8 @@ CameraComponent.prototype.setFar = function(v, noUpdate) {
 		this.threeobj.updateProjectionMatrix();
 }
 
-Components.register('camera', CameraComponent);
+Components.register('camera', CameraComponent, {
+	fov: 'number',
+	near: 'number',
+	far: 'number'
+});

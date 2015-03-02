@@ -117,4 +117,6 @@ FlyControllerComponent.prototype.update = function(dt) {
 	}
 }
 
-Components.register('flycontroller', FlyControllerComponent);
+Components.register('flycontroller', FlyControllerComponent, {
+	
+});

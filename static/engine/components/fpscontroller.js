@@ -129,4 +129,6 @@ FPSControllerComponent.prototype.update = function(dt) {
 		this.physics.applyCentralImpulse(fwdDir);
 }
 
-Components.register('fpscontroller', FPSControllerComponent);
+Components.register('fpscontroller', FPSControllerComponent, {
+	
+});
