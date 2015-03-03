@@ -43,8 +43,8 @@
 			<div role="tabpanel" class="relative tab-pane active" id="sceneEditorPanel">
 				<div id="sceneEditor">
 				</div>
-				<div class="properties">
-					Component settings
+				<div id="properties">
+					
 				</div>
 			</div>
 			<div role="tabpanel" class="relative tab-pane" id="phys">
@@ -100,6 +100,59 @@
 			</li>
 			{{/each}}
 		</ul>
+		{% endraw %}
+	</script>
+
+	<script type="text/html" id="properties_template">
+		{% raw %}
+		{{#each this}}
+		<div class="properties_component well">
+			<h4><button type="button" class="btn btn-link btn-xs proptoggle"><span class="glyphicon glyphicon-folder-open"></span></button> {{@key}}</h4>
+			{{#each this}}
+				<div class="form-group" data-component="{{@../key}}" data-property="{{@key}}">
+				<label>{{@key}}</label>
+				{{#isArray this}}
+					<select class="form-control">
+						{{#each this}}
+						<option value="{{this}}">{{this}}</option>
+						{{/each}}
+					</select>
+				{{else}}
+					{{#isEq this "bool"}}
+						<input type="checkbox" class="form-control">
+					{{/isEq}}
+					{{#isEq this "number"}}
+						<br />
+						<input type="range" class="form-control" min="0" max="400" step="0.01">
+					{{/isEq}}
+					{{#isEq this "scalar"}}
+						<br />
+						<input type="range" class="form-control" min="0" max="1" step="0.01">
+					{{/isEq}}
+					{{#isEq this "vector"}}
+						<br />
+						x: <input type="range" class="form-control" min="0" max="400" step="0.01">
+						y: <input type="range" class="form-control" min="0" max="400" step="0.01">
+						z: <input type="range" class="form-control" min="0" max="400" step="0.01">
+					{{/isEq}}
+					{{#isEq this "quaternion"}}
+						<br />
+						x: <input type="range" class="form-control" min="0" max="1" step="0.01">
+						y: <input type="range" class="form-control" min="0" max="1" step="0.01">
+						z: <input type="range" class="form-control" min="0" max="1" step="0.01">
+						w: <input type="range" class="form-control" min="0" max="1" step="0.01">
+					{{/isEq}}
+					{{#isEq this "colour"}}
+						<br />
+						r: <input type="range" class="form-control" min="0" max="255" step="0.01">
+						g: <input type="range" class="form-control" min="0" max="255" step="0.01">
+						b: <input type="range" class="form-control" min="0" max="255" step="0.01">
+					{{/isEq}}
+				{{/isArray}}
+				</div>
+			{{/each}}
+		</div>
+		{{/each}}
 		{% endraw %}
 	</script>
 	

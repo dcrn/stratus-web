@@ -1,4 +1,10 @@
-body, html {margin: 0; height: 100%; overflow: hidden; line-height: 0px;}
+body, html {
+	margin: 0; 
+	height: 100%; 
+	overflow: hidden; 
+	line-height: 0px;
+	position: relative;
+}
 .nav-tabs>li { height: 26px; line-height: 0.4em !important; }
 .nav-tabs>li>a { height: 26px; line-height: 0.4em !important; }
 #sidebar {
@@ -20,15 +26,17 @@ body, html {margin: 0; height: 100%; overflow: hidden; line-height: 0px;}
 	height: 100%;
 }
 
-.properties {
+#properties {
 	position: absolute;
 	top: 0;
 	left: 60%;
+	right: 20%;
 	bottom: 0;
-	right: 0;
 	height: 100%;
+	padding: 6px;
 	border: 1px solid lightgray;
 	border-top: 0px;
+	overflow: auto;
 }
 
 #main .tab-content {
@@ -93,13 +101,50 @@ a[role=tab]:hover {
 }
 
 .exp_entity {
-	text-indent: 18px;
+	text-indent: 12px;
 }
 
 .exp_component {
-	text-indent: 36px;
+	text-indent: 41px;
 }
 
-a.listtoggle:hover {
-	cursor: pointer;
+.properties_component.well {
+	margin-top: 0px;
+	margin-bottom: 6px;
+	padding: 4px;
+}
+
+.properties_component label {
+	margin-bottom: 0;
+}
+
+.properties_component .form-group {
+	border-top: 1px solid #d8d8d8;
+	margin-bottom: 4px;
+}
+
+.properties_component h4 {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.properties_component h4 span {
+	padding: 4px;
+}
+
+.properties_component input[type="checkbox"] {
+	float: right;
+	display: inline-block;
+	width: 16px;height: 16px;
+}
+
+.properties_component input[type="range"] {
+	height: 16px;
+	padding: 0;
+}
+
+
+.properties_component select {
+	padding: 0px;
+	height: 24px;
 }

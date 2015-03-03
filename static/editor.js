@@ -6,9 +6,34 @@ Editor.init = function() {
 
 	this.renderer.setClearColor(0xE0E0E0);
 
-	this.camera = new THREE.PerspectiveCamera(75, 0, 0.1, 1000);
-	this.camera.position.set(0, -40, 0);
+	this.camera = new THREE.PerspectiveCamera(75, 16/9, 0.1, 1000);
+	this.camera.position.set(0, -100, 10);
+	this.camera.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2);
+
 	this.updateCamera();
+
+	// Handlebars setup
+	Handlebars.registerHelper('isArray', 
+		function (context, options) {
+			if (Handlebars.Utils.isArray(context))
+				return options.fn(this);
+			else
+				return options.inverse(this);
+	});
+
+	Handlebars.registerHelper('isEq', 
+		function (context, value, options) {
+			if (context.valueOf() === value)
+				return options.fn(this);
+			else
+				return options.inverse(this);
+	});
+
+	this.explorer_template = Handlebars.compile(
+		$('#explorer_template').html());
+
+	this.properties_template = Handlebars.compile(
+		$('#properties_template').html());
 }
 
 Editor.updateCamera = function() {
@@ -16,7 +41,9 @@ Editor.updateCamera = function() {
 	var h = $('#sceneEditor').height();
 
 	this.renderer.setSize(w, h);
+
 	this.camera.aspect = w / h;
+	this.camera.updateProjectionMatrix();
 
 	this.invalidate();
 }
@@ -38,12 +65,29 @@ Editor.invalidate = function() {
 Editor.start = function() {
 	var self = this;
 	this.invalidate();
-	this.updateSceneExplorer();
+	this.updateExplorer();
 	this.updateComponentList();
 
 	function update() {
 		requestAnimationFrame(update);
 		if (self.paint && self.activeScene) {
+			for (var entid in self.activeScene.entities) {
+				var ent = self.activeScene.entities[entid];
+				var comps = ent.components();
+
+				for (c in comps) {
+					var com = comps[c];
+					if ('threeobj' in com) {
+						if (ent.has('transform')) {
+							var transform = ent.get('transform');
+							com.threeobj.position.copy(transform.getPosition());
+							com.threeobj.quaternion.copy(transform.getRotation());
+							com.threeobj.scale.copy(transform.getScale());
+						}
+					}
+				}
+			}
+
 			self.renderer.render(
 				self.activeScene.threeobj, 
 				self.camera
@@ -67,25 +111,28 @@ Editor.getActiveScene = function(s) {
 }
 
 Editor.selectScene = function(s) {
-
+	this.selectedScene = s;
+	this.setActiveScene(this.scenes[s]);
+	this.invalidate();
 }
 
 Editor.selectEntity = function(s, e) {
-
+	this.selectScene(s);
+	this.selectedEntity = e;
+	this.updatePropertiesList();
+	this.invalidate();
 }
 
 Editor.selectComponent = function(s, e, c) {
-
+	this.selectEntity(s, e);
+	// Show menu?
 }
 
-Editor.updateSceneExplorer = function() {
+Editor.updateExplorer = function() {
 	var explorer = $('#explorer');
+	var html = this.explorer_template(this.gamedata);
+	
 	explorer.empty();
-
-	var source = $('#explorer_template').html();
-	var temp = Handlebars.compile(source);
-
-	var html = temp(this.gamedata);
 	explorer.append(html);
 
 	$('.explorer_item').click(this.explorerOnClick);
@@ -97,14 +144,46 @@ Editor.updateComponentList = function() {
 }
 
 Editor.updatePropertiesList = function() {
+	var el = $('#properties');
 
+	var components = this.gamedata
+		.scenes[this.selectedScene]
+		.entities[this.selectedEntity];
+
+	var properties = {};
+	for (comid in components) {
+		properties[comid] = Components.getProperties(comid);
+	}
+
+	var html = this.properties_template(properties);
+	el.empty();
+	el.append(html);
+
+	$('.proptoggle').click(this.propertiesOnPropToggle);
 }
 
 // Events:
+
 Editor.explorerOnClick = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
-	console.log($(this));
+	var el, type, id;
+	el = $(this);
+	type = el.data('type');
+	id = el.data('id');
+
+	if (type == 'scene') {
+		Editor.selectScene(id);
+	}
+	else if (type == 'entity') {
+		Editor.selectEntity(el.data('scene'), id);
+	}
+	else if (type == 'component') {
+		Editor.selectComponent(
+			el.data('scene'), 
+			el.data('entity'), 
+			id);
+	}
 }
 
 Editor.explorerOnListToggle = function(e) {
@@ -116,4 +195,15 @@ Editor.explorerOnListToggle = function(e) {
 	var span = el.find('span:first');
 	span.toggleClass('glyphicon-folder-open');
 	span.toggleClass('glyphicon-folder-close');
+}
+
+Editor.propertiesOnPropToggle = function(e) {
+	e.preventDefault();
+	e.stopPropagation();
+	
+	var el = $(this);
+	el.parent().parent().find('.form-group').toggle();
+	var span = el.find('span:first');
+	span.toggleClass('glyphicon-folder-open');
+	span.toggleClass('glyphicon-folder-close')
 }
