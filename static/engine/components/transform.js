@@ -1,11 +1,9 @@
 TransformComponent = function(options) {
-	options = options || {};
-
 	this.sub = null;
 
-	this._scale = options.scale || new Vector3(1, 1, 1);
-	this._position = options.position || new Vector3(0, 0, 0);
-	this._rotation = options.rotation || new Quaternion(0, 0, 0, 1);
+	this._scale = options.scale;
+	this._position = options.position;
+	this._rotation = options.rotation;
 }
 
 TransformComponent.prototype.applyTransform = function() {
@@ -67,7 +65,7 @@ TransformComponent.prototype.setScale = function(v) {
 }
 
 Components.register('transform', TransformComponent, {
-	position: 'vector',
-	scale: 'vector',
-	rotation: 'quaternion'
+	position: {type: 'vector', default: [0, 0, 0]},
+	scale: {type: 'vector', default: [0, 0, 0]},
+	rotation: {type: 'quaternion', default: [0, 0, 0, 1]}
 });

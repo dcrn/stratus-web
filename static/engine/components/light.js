@@ -1,30 +1,4 @@
 LightComponent = function(options) {
-	options = options || {};
-	if (!('type' in options))
-		options.type = 'point';
-	if (!('colour' in options))
-		options.colour = 0xFFFFFF;
-	if (!('intensity' in options))
-		options.intensity = 1.0;
-	if (!('distance' in options))
-		options.distance = 0.0;
-	if (!('angle' in options))
-		options.angle = Math.PI/3;
-	if (!('exponent' in options))
-		options.exponent = 10.0;
-	if (!('castShadow' in options))
-		options.castShadow = false;
-	if (!('shadowDarkness' in options))
-		options.shadowDarkness = 0.5;
-	if (!('shadowCameraNear' in options))
-		options.shadowCameraNear = 0.1;
-	if (!('shadowCameraFar' in options))
-		options.shadowCameraFar = 1000.0;
-	if (!('shadowCameraFov' in options))
-		options.shadowCameraFov = 75;
-	if (!('shadowCameraVisible' in options))
-		options.shadowCameraVisible = false;
-
 	this.type = options.type;
 	if (options.type == 'ambient')
 		this.threeobj = new THREE.AmbientLight();
@@ -145,16 +119,16 @@ LightComponent.prototype.setShadowCameraVisible = function(v) {
 }
 
 Components.register('light', LightComponent, {
-	type: ['point', 'spotlight', 'directional', 'ambient'],
-	colour: 'colour',
-	intensity: 'scalar',
-	distance: 'number',
-	angle: 'number',
-	exponent: 'number',
-	castShadow: 'bool',
-	shadowDarkness: 'scalar',
-	shadowCameraNear: 'number',
-	shadowCameraFar: 'number',
-	shadowCameraFov: 'number',
-	shadowCameraVisible: 'bool'
+	type: {type: ['point', 'spotlight', 'directional', 'ambient'], default: 'point'},
+	colour: {type: 'colour', default: 0xFFFFFF},
+	intensity: {type: 'scalar', default: 1.0},
+	distance: {type: 'number', default: 0},
+	angle: {type: 'number', default: Math.PI/3},
+	exponent: {type: 'number', default: 10.0},
+	castShadow: {type: 'bool', default: false},
+	shadowDarkness: {type: 'scalar', default: 0.5},
+	shadowCameraNear: {type: 'number', default: 0.1},
+	shadowCameraFar: {type: 'number', default: 1000.0},
+	shadowCameraFov: {type: 'number', default: 75},
+	shadowCameraVisible: {type: 'bool', default: false}
 });

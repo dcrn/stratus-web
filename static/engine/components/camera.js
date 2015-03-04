@@ -1,9 +1,4 @@
 CameraComponent = function(options) {
-	options = options || {};
-	options.fov = options.fov || 75;
-	options.near = options.near || 0.1;
-	options.far = options.far || 1000.0;
-
 	this.threeobj = new THREE.PerspectiveCamera();
 	this.threeobj.up.set(0, 0, 1);
 
@@ -71,7 +66,7 @@ CameraComponent.prototype.setFar = function(v, noUpdate) {
 }
 
 Components.register('camera', CameraComponent, {
-	fov: 'number',
-	near: 'number',
-	far: 'number'
+	fov: {type: 'number', default: 75},
+	near: {type: 'number', default: 0.1},
+	far: {type: 'number', default: 1000}
 });

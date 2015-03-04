@@ -19,11 +19,17 @@ Game.init = function() {
 Game.loadScene = function(json) {
 	var opt = {}, scene, ent;
 
-	if(json.config)
-		opt = this.loadOptions(json.config);
+	if(json.config) {
+		opt = json.config;
+
+		if ('gravity' in opt) {
+			opt.gravity = new Vector3(opt.gravity.parameters[0],
+				opt.gravity.parameters[1],
+				opt.gravity.parameters[2]);
+		}
+	}
 
 	scene = new Scene(opt);
-
 	for (entid in json.entities) {
 		ent = this.loadEntity(json.entities[entid]);
 
@@ -40,39 +46,11 @@ Game.loadEntity = function(json) {
 	var entity = new Entity(), opt, com;
 
 	for (comid in json) {
-		opt = this.loadOptions(json[comid]);
-		com = Components.create(comid, opt);
+		com = Components.create(comid, json[comid]);
 		entity.add(com);
 	}
 
 	return entity;
-}
-
-Game.loadOptions = function(json) {
-	var options = {}, v, i;
-
-	for (i in json) {
-		v = json[i];
-
-		if (typeof v === 'object' && v.type === 'vector') {
-			options[i] = new Vector3(
-				v.parameters[0],
-				v.parameters[1],
-				v.parameters[2]);
-		}
-		else if (typeof v === 'object' && v.type === 'quaternion') {
-			options[i] = new Quaternion(
-				v.parameters[0],
-				v.parameters[1],
-				v.parameters[2],
-				v.parameters[3]);
-		}
-		else {
-			options[i] = v;
-		}
-	}
-
-	return options;
 }
 
 Game.load = function(json) {
@@ -87,7 +65,7 @@ Game.load = function(json) {
 
 	// Have config and initialized
 	if (json.config && this.renderer) {
-		var config = this.loadOptions(json.config);
+		var config = json.config;
 
 		if ('shadowMapEnabled' in config)
 			this.setShadowMapEnabled(config.shadowMapEnabled);

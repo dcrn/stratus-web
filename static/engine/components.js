@@ -13,10 +13,45 @@ Components.register = function(id, obj, props) {
 }
 
 Components.create = function(id, options) {
-	if (id in this.comps)
-		return new this.comps[id](options);
+	if (id in this.comps) {
+		return new this.comps[id](
+			this.getDefaultOptions(id, options)
+		);
+	}
 
 	return false;
+}
+
+Components.getDefaultOptions = function(id, options) {
+	options = options || {};
+	var opt = {};
+
+	// Copy defaults, translate flat vectors and quats to real ones
+	for (p in this.properties[id]) {
+		var type = this.properties[id][p].type;
+
+		if (p in options) {
+			if (typeof options[p] == 'object')
+				opt[p] = options[p].parameters
+			else
+				opt[p] = options[p];
+		}
+		else {
+			opt[p] = this.properties[id][p].default;
+		}
+
+		if (type === 'vector')
+			opt[p] = new Vector3(opt[p][0],
+				opt[p][1],
+				opt[p][2]);
+		if (type === 'quaternion')
+			opt[p] = new Quaternion(opt[p][0],
+				opt[p][1],
+				opt[p][2],
+				opt[p][3]);
+	}
+
+	return opt;
 }
 
 Components.list = function() {

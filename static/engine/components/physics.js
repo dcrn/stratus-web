@@ -1,19 +1,4 @@
 PhysicsComponent = function(options) {
-	options = options || {};
-
-	if (!('shape' in options))
-		options.shape = 'box';
-	if (!('mass' in options))
-		options.mass = 1;
-	if (!('friction' in options))
-		options.friction = 0.5;
-	if (!('damping' in options))
-		options.damping = 0.0;
-	if (!('angularDamping' in options))
-		options.angularDamping = 0.0;
-	if (!('restitution' in options))
-		options.restitution = 0.0;
-
 	if (options.shape == 'sphere')
 		this.shape = new Ammo.btSphereShape(0.5);
 	else if (options.shape == 'cylinder')
@@ -218,10 +203,10 @@ PhysicsComponent.prototype.setAngularVelocity = function(v) {
 }
 
 Components.register('physics', PhysicsComponent, {
-	shape: ['box', 'sphere', 'cylinder'],
-	mass: 'number',
-	friction: 'scalar',
-	damping: 'scalar',
-	angularDamping: 'scalar',
-	restitution: 'scalar'
+	shape: {type: ['box', 'sphere', 'cylinder'], default: 'box'},
+	mass: {type: 'number', default: 1},
+	friction: {type: 'scalar', default: 0.5},
+	damping: {type: 'scalar', default: 0.0},
+	angularDamping: {type: 'scalar', default: 0.0},
+	restitution: {type: 'scalar', default: 0.0}
 });

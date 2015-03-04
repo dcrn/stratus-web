@@ -1,16 +1,4 @@
 MeshComponent = function(options) {
-	options = options || {};
-	if (!('shape' in options))
-		options.shape = 'box';
-	if (!('castShadow' in options))
-		options.castShadow = false;
-	if (!('receiveShadow' in options))
-		options.receiveShadow = false;
-	if (!('materialType' in options))
-		options.materialType = 'lambert';
-	if (!('materialColour' in options))
-		options.materialColour = 0xFFFFFF;
-
 	this.threeobj = new THREE.Mesh();
 	this.threeobj.up.set(0, 0, 1);
 
@@ -40,9 +28,9 @@ MeshComponent.prototype.setShape = function(s) {
 	if (s == 'plane')
 		this.threeobj.geometry = new THREE.PlaneBufferGeometry(1, 1);
 	else if (s == 'sphere')
-		this.threeobj.geometry = new THREE.SphereGeometry(0.5);
+		this.threeobj.geometry = new THREE.SphereGeometry(0.5, 16, 16);
 	else if (s == 'cylinder')
-		this.threeobj.geometry = new THREE.CylinderGeometry(0.5, 0.5, 1);
+		this.threeobj.geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
 	else
 		this.threeobj.geometry = new THREE.BoxGeometry(1, 1, 1);
 }
@@ -91,9 +79,9 @@ MeshComponent.prototype.setReceiveShadow = function(b) {
 }
 
 Components.register('mesh', MeshComponent, {
-	shape: ['box', 'sphere', 'cylinder', 'plane'],
-	castShadow: 'bool',
-	receiveShadow: 'bool',
-	materialType: ['phong', 'lambert', 'basic'],
-	materialColour: 'colour'
+	shape: {type: ['box', 'sphere', 'cylinder', 'plane'], default: 'box'},
+	castShadow: {type: 'bool', default: false},
+	receiveShadow: {type: 'bool', default: false},
+	materialType: {type: ['phong', 'lambert', 'basic'], default: 'lambert'},
+	materialColour: {type: 'colour', default: 0xFFFFFF}
 });
