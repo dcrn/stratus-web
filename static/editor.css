@@ -70,6 +70,8 @@ a[role=tab]:hover {
 	height: 100%;
 }
 
+/* Scene Explorer */
+
 #explorer ul {
 	border-top: 1px solid #eee;
 	padding-left: 0px;
@@ -86,14 +88,38 @@ a[role=tab]:hover {
 .explorer_item {
 	display: block;
 	border-bottom: 1px solid #eee;
+
+	color: #222;
+	background-color: #fff;
 }
 
 .explorer_item:hover {
-	cursor: default;
+	cursor: pointer;
 }
 
 .explorer_item span {
 	text-indent: 0px;
+}
+
+.explorer_item.selected {
+	background-color: #46c;
+	color: white;
+}
+.explorer_item.selected > button {
+	color: #ccf;
+}
+.explorer_item.selected > button:hover {
+	color: #eef;
+}
+
+.explorer_item.selected > .explorer_actions {
+	display: block !important;
+	float: right;
+}
+
+.explorer_actions {
+	display: none !important;
+	float: right;
 }
 
 .exp_scene {
@@ -108,6 +134,8 @@ a[role=tab]:hover {
 	text-indent: 41px;
 }
 
+/* Component properties */
+
 .properties_component.well {
 	margin-top: 0px;
 	margin-bottom: 6px;
@@ -120,6 +148,7 @@ a[role=tab]:hover {
 
 .properties_component .form-group {
 	border-top: 1px solid #d8d8d8;
+	padding-top: 2px;
 	margin-bottom: 4px;
 }
 
@@ -143,8 +172,15 @@ a[role=tab]:hover {
 	padding: 0;
 }
 
-
 .properties_component select {
 	padding: 0px;
 	height: 24px;
+}
+
+.properties_header {
+	font-size: 14px;
+	font-weight: bold;
+	padding: 1px;
+	border-bottom: 1px solid #d8d8d8;
+	margin-bottom: 4px;
 }

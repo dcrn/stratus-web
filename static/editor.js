@@ -52,10 +52,12 @@ Editor.load = function(gamedata) {
 	this.gamedata = gamedata;
 	this.scenes = Game.load(gamedata);
 
-	if ('config' in gamedata && 'defaultSceneID' in gamedata.config)
+	if ('config' in gamedata && 'defaultSceneID' in gamedata.config) {
+		this.selectedScene = gamedata.config.defaultSceneID;
 		this.setActiveScene(
 			this.scenes[gamedata.config.defaultSceneID]
 		);
+	}
 }
 
 Editor.invalidate = function() {
@@ -112,6 +114,10 @@ Editor.getActiveScene = function(s) {
 
 Editor.selectScene = function(s) {
 	this.selectedScene = s;
+	this.selectedEntity = null;
+
+	Editor.explorerOnSelect('scene', s);
+	this.updatePropertiesList();
 	this.setActiveScene(this.scenes[s]);
 	this.invalidate();
 }
@@ -119,15 +125,21 @@ Editor.selectScene = function(s) {
 Editor.selectEntity = function(s, e) {
 	this.selectScene(s);
 	this.selectedEntity = e;
+
+	Editor.explorerOnSelect('entity', s, e);
 	this.updatePropertiesList();
 	this.invalidate();
 }
 
 Editor.selectComponent = function(s, e, c) {
 	this.selectEntity(s, e);
-	// Show menu?
+	this.selectedComponent = c;
+
+	Editor.explorerOnSelect('component', s, e, c);
+	this.invalidate();
 }
 
+// Update views
 Editor.updateExplorer = function() {
 	var explorer = $('#explorer');
 	var html = this.explorer_template(this.gamedata);
@@ -137,6 +149,16 @@ Editor.updateExplorer = function() {
 
 	$('.explorer_item').click(this.explorerOnClick);
 	$('.listtoggle').click(this.explorerOnListToggle);
+
+	if (this.selectedScene) {
+		Editor.explorerOnSelect('scene', this.selectedScene);
+
+		if (this.selectedEntity)
+			Editor.explorerOnSelect('entity', this.selectedScene, this.selectedEntity);
+	}
+
+	// jQuery events
+	$('.explorer_actions').tooltip({container:'body'});
 }
 
 Editor.updateComponentList = function() {
@@ -145,14 +167,16 @@ Editor.updateComponentList = function() {
 
 Editor.updatePropertiesList = function() {
 	var el = $('#properties');
+	var properties = {}
 
-	var components = this.gamedata
-		.scenes[this.selectedScene]
-		.entities[this.selectedEntity];
+	if (this.selectedEntity) {
+		var components = this.gamedata
+			.scenes[this.selectedScene]
+			.entities[this.selectedEntity];
 
-	var properties = {};
-	for (comid in components) {
-		properties[comid] = Components.getProperties(comid);
+		for (comid in components) {
+			properties[comid] = Components.getProperties(comid);
+		}
 	}
 
 	var html = this.properties_template(properties);
@@ -184,6 +208,27 @@ Editor.explorerOnClick = function(e) {
 			el.data('entity'), 
 			id);
 	}
+}
+
+Editor.explorerOnSelect = function(type, s, e, c) {
+	var selector = '.explorer_item[data-type="' + type + '"]';
+	if (type == 'entity' || type == 'component')
+		selector += '[data-scene="' + s + '"]';
+	if (type == 'component')
+		selector += '[data-entity="' + e + '"]';
+
+	selector += '[data-id="' + (c || e || s) + '"]';
+
+	if (type == 'component')
+		$('.explorer_item.selected[data-type=component]').
+			toggleClass('selected');
+	else if (type == 'entity')
+		$('.explorer_item.selected[data-type=entity]').
+			toggleClass('selected');
+	else
+		$('.explorer_item.selected').toggleClass('selected');
+
+	$(selector).toggleClass('selected');
 }
 
 Editor.explorerOnListToggle = function(e) {

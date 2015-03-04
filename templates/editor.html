@@ -44,7 +44,8 @@
 				<div id="sceneEditor">
 				</div>
 				<div id="properties">
-					
+					<div class="properties_header">Entity Properties</div>
+					<div class="text-center">No entity selected</div>
 				</div>
 			</div>
 			<div role="tabpanel" class="relative tab-pane" id="phys">
@@ -80,17 +81,39 @@
 				<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-folder-open"></span></button>
 				<span class="glyphicon glyphicon-picture"></span>
 				{{@key}}
+				<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+					<span class="glyphicon glyphicon-trash"></span>
+				</button>
+				<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="add" data-toggle="tooltip" data-placement="bottom" title="New Entity">
+					<span class="glyphicon glyphicon-plus"></span>
+				</button>
+				<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
+					<span class="glyphicon glyphicon-duplicate"></span>
+				</button>
 				<ul>
 					{{#each this.entities}}
 					<li class="explorer_item exp_entity" data-type="entity" data-scene="{{@../key}}" data-id="{{@key}}">
 						<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-folder-close"></span></button>
 						<span class="glyphicon glyphicon-tree-deciduous"></span>
 						{{@key}}
+						<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+							<span class="glyphicon glyphicon-trash"></span>
+						</button>
+						<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="add" data-toggle="tooltip" data-placement="bottom" title="New Component">
+							<span class="glyphicon glyphicon-plus"></span>
+						</button>
+						<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
+							<span class="glyphicon glyphicon-duplicate"></span>
+						</button>
+						
 						<ul style="display:none;">
 							{{#each this}}
 							<li class="explorer_item exp_component" data-type="component" data-scene="{{@../../key}}" data-entity="{{@../key}}" data-id="{{@key}}">
 								<span class="glyphicon glyphicon-file"></span>
-								{{@key}}
+								{{@key}} 
+								<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+									<span class="glyphicon glyphicon-trash"></span>
+								</button>
 							</li>
 							{{/each}}
 						</ul>
@@ -105,6 +128,7 @@
 
 	<script type="text/html" id="properties_template">
 		{% raw %}
+		<div class="properties_header">Entity Properties</div>
 		{{#each this}}
 		<div class="properties_component well">
 			<h4><button type="button" class="btn btn-link btn-xs proptoggle"><span class="glyphicon glyphicon-folder-open"></span></button> {{@key}}</h4>
@@ -153,6 +177,9 @@
 			{{/each}}
 		</div>
 		{{/each}}
+		<br />
+		<br />
+		<br />
 		{% endraw %}
 	</script>
 	
