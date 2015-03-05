@@ -1,7 +1,10 @@
 MeshComponent = function(options) {
 	this.threeobj = new THREE.Mesh();
 	this.threeobj.up.set(0, 0, 1);
+	this.applyOptions(options);
+}
 
+MeshComponent.prototype.applyOptions = function(options) {
 	this.setShape(options.shape);
 	this.setMaterialType(options.materialType);
 	this.setMaterialColour(options.materialColour);

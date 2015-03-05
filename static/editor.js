@@ -5,10 +5,11 @@ Editor.init = function() {
 	$('#sceneEditor').append(this.renderer.domElement);
 
 	this.renderer.setClearColor(0xE0E0E0);
+	this.renderer.shadowMapEnabled = true;
 
 	this.camera = new THREE.PerspectiveCamera(75, 16/9, 0.1, 1000);
-	this.camera.position.set(0, -100, 10);
-	this.camera.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2);
+	this.camera.position.set(0, -100, 40);
+	this.camera.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2.5);
 
 	this.updateCamera();
 
@@ -44,8 +45,6 @@ Editor.updateCamera = function() {
 
 	this.camera.aspect = w / h;
 	this.camera.updateProjectionMatrix();
-
-	this.invalidate();
 }
 
 Editor.load = function(gamedata) {
@@ -60,19 +59,14 @@ Editor.load = function(gamedata) {
 	}
 }
 
-Editor.invalidate = function() {
-	this.paint = true;
-}
-
 Editor.start = function() {
 	var self = this;
-	this.invalidate();
 	this.updateExplorer();
 	this.updateComponentList();
 
 	function update() {
 		requestAnimationFrame(update);
-		if (self.paint && self.activeScene) {
+		if (self.activeScene) {
 			for (var entid in self.activeScene.entities) {
 				var ent = self.activeScene.entities[entid];
 				var comps = ent.components();
@@ -94,7 +88,6 @@ Editor.start = function() {
 				self.activeScene.threeobj, 
 				self.camera
 			);
-			self.paint = false;
 		}
 	}
 	requestAnimationFrame(update);
@@ -119,7 +112,6 @@ Editor.selectScene = function(s) {
 	Editor.explorerOnSelect('scene', s);
 	this.updatePropertiesList();
 	this.setActiveScene(this.scenes[s]);
-	this.invalidate();
 }
 
 Editor.selectEntity = function(s, e) {
@@ -128,7 +120,6 @@ Editor.selectEntity = function(s, e) {
 
 	Editor.explorerOnSelect('entity', s, e);
 	this.updatePropertiesList();
-	this.invalidate();
 }
 
 Editor.selectComponent = function(s, e, c) {
@@ -136,7 +127,6 @@ Editor.selectComponent = function(s, e, c) {
 	this.selectedComponent = c;
 
 	Editor.explorerOnSelect('component', s, e, c);
-	this.invalidate();
 }
 
 // Update views
@@ -167,7 +157,7 @@ Editor.updateComponentList = function() {
 
 Editor.updatePropertiesList = function() {
 	var el = $('#properties');
-	var properties = {}
+	var info = {}
 
 	if (this.selectedEntity) {
 		var components = this.gamedata
@@ -175,15 +165,37 @@ Editor.updatePropertiesList = function() {
 			.entities[this.selectedEntity];
 
 		for (comid in components) {
-			properties[comid] = Components.getProperties(comid);
+			info[comid] = {};
+
+			var options = Components.getDefaults(
+				comid, 
+				components[comid],
+				true
+			);
+
+			var props = Components.getProperties(comid);
+			var val, type;
+			for (p in props) {
+				val = options[p];
+				type = props[p].type;
+
+				if (type == 'colour')
+					val = [val >> 16 & 0xFF, val >> 8 & 0xFF, val & 0xFF];
+
+				info[comid][p] = {
+					type: type,
+					value: val
+				};
+			}
 		}
 	}
 
-	var html = this.properties_template(properties);
+	var html = this.properties_template(info);
 	el.empty();
 	el.append(html);
 
 	$('.proptoggle').click(this.propertiesOnPropToggle);
+	$('.properties_component input, .properties_component select').change(this.propertiesOnChange);
 }
 
 // Events:
@@ -250,5 +262,49 @@ Editor.propertiesOnPropToggle = function(e) {
 	el.parent().parent().find('.form-group').toggle();
 	var span = el.find('span:first');
 	span.toggleClass('glyphicon-folder-open');
-	span.toggleClass('glyphicon-folder-close')
+	span.toggleClass('glyphicon-folder-close');
+}
+
+Editor.propertiesOnChange = function(e) {
+	var el = $(this).parent();
+
+	var ent = Editor.gamedata.scenes[Editor.selectedScene].
+		entities[Editor.selectedEntity];
+	var comid = el.data('component');
+	var prop = el.data('property');
+	var type = el.data('type');
+	var com = ent[comid];
+
+	if (type == 'bool')
+		com[prop] = $(this).prop('checked');
+	else if (type == 'number' || type == 'scalar')
+		com[prop] = Number.parseFloat($(this).val());
+	else if (type == 'list')
+		com[prop] = $(this).val();
+	else if (type == 'vector' || type == 'quaternion') { // Multi-part inputs
+		var x = Number.parseFloat(el.find('[data-axis=x]').val());
+		var y = Number.parseFloat(el.find('[data-axis=y]').val());
+		var z = Number.parseFloat(el.find('[data-axis=z]').val());
+		if (type == 'vector')
+			com[prop] = {type: type, parameters: [x, y, z]};
+		else if (type == 'quaternion') {
+			var w = Number.parseFloat(el.find('[data-axis=w]').val());
+			com[prop] = {type: type, parameters: [x, y, z, w]};
+		}
+	}
+	else if (type == 'colour') {
+		var r = Number.parseFloat(el.find('[data-axis=r]').val());
+		var g = Number.parseFloat(el.find('[data-axis=g]').val());
+		var b = Number.parseFloat(el.find('[data-axis=b]').val());
+		var c = r << 16 | g << 8 | b;
+
+		com[prop] = c;
+	}
+
+	// Update Game object entities
+	var comobj = Game.scenes[Editor.selectedScene].
+		entities[Editor.selectedEntity].
+		get(comid);
+
+	Components.applyOptions(comid, comobj, com);
 }

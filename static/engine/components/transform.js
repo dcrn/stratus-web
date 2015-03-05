@@ -1,9 +1,16 @@
 TransformComponent = function(options) {
 	this.sub = null;
+	this._scale = new Vector3();
+	this._position = new Vector3();
+	this._rotation = new Quaternion();
 
-	this._scale = options.scale;
-	this._position = options.position;
-	this._rotation = options.rotation;
+	this.applyOptions(options);
+}
+
+TransformComponent.prototype.applyOptions = function(options) {
+	this.setScale(options.scale);
+	this.setPosition(options.position);
+	this.setRotation(options.rotation);
 }
 
 TransformComponent.prototype.applyTransform = function() {

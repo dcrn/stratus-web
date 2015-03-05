@@ -15,14 +15,14 @@ Components.register = function(id, obj, props) {
 Components.create = function(id, options) {
 	if (id in this.comps) {
 		return new this.comps[id](
-			this.getDefaultOptions(id, options)
+			this.getDefaults(id, options)
 		);
 	}
 
 	return false;
 }
 
-Components.getDefaultOptions = function(id, options) {
+Components.getDefaults = function(id, options, notranslate) {
 	options = options || {};
 	var opt = {};
 
@@ -40,18 +40,28 @@ Components.getDefaultOptions = function(id, options) {
 			opt[p] = this.properties[id][p].default;
 		}
 
-		if (type === 'vector')
-			opt[p] = new Vector3(opt[p][0],
-				opt[p][1],
-				opt[p][2]);
-		if (type === 'quaternion')
-			opt[p] = new Quaternion(opt[p][0],
-				opt[p][1],
-				opt[p][2],
-				opt[p][3]);
+		if (!notranslate) {
+			if (type === 'vector')
+				opt[p] = new Vector3(opt[p][0],
+					opt[p][1],
+					opt[p][2]);
+			if (type === 'quaternion')
+				opt[p] = new Quaternion(opt[p][0],
+					opt[p][1],
+					opt[p][2],
+					opt[p][3]);
+		}
 	}
 
 	return opt;
+}
+
+Components.applyOptions = function(comid, comobj, options) {
+	options = options || {};
+	if ('applyOptions' in comobj)
+		comobj.applyOptions(
+			Components.getDefaults(comid, options)
+		);
 }
 
 Components.list = function() {

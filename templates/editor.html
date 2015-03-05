@@ -91,7 +91,7 @@
 					<span class="glyphicon glyphicon-duplicate"></span>
 				</button>
 				<ul>
-					{{#each this.entities}}
+					{{#each entities}}
 					<li class="explorer_item exp_entity" data-type="entity" data-scene="{{@../key}}" data-id="{{@key}}">
 						<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-folder-close"></span></button>
 						<span class="glyphicon glyphicon-tree-deciduous"></span>
@@ -130,47 +130,51 @@
 		{% raw %}
 		<div class="properties_header">Entity Properties</div>
 		{{#each this}}
-		<div class="properties_component well">
+		<div class="properties_component well" data-component="{{@key}}">
 			<h4><button type="button" class="btn btn-link btn-xs proptoggle"><span class="glyphicon glyphicon-folder-open"></span></button> {{@key}}</h4>
 			{{#each this}}
-				<div class="form-group" data-component="{{@../key}}" data-property="{{@key}}">
+				<div class="form-group" data-component="{{@../key}}" data-property="{{@key}}" data-type="{{#isArray type}}list{{else}}{{type}}{{/isArray}}">
 				<label>{{@key}}</label>
-				{{#isArray this}}
+				{{#isArray type}}
 					<select class="form-control">
-						{{#each this}}
-						<option value="{{this}}">{{this}}</option>
+						{{#each type}}
+							{{#isEq this ../value}}
+							<option value="{{this}}" selected>{{this}}</option>
+							{{else}}
+							<option value="{{this}}">{{this}}</option>
+							{{/isEq}}
 						{{/each}}
 					</select>
 				{{else}}
-					{{#isEq this "bool"}}
-						<input type="checkbox" class="form-control">
+					{{#isEq type "bool"}}
+						<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
 					{{/isEq}}
-					{{#isEq this "number"}}
+					{{#isEq type "number"}}
 						<br />
-						<input type="range" class="form-control" min="0" max="400" step="0.01">
+						<input type="range" class="form-control" min="0" max="1000" step="0.01" value="{{value}}">
 					{{/isEq}}
-					{{#isEq this "scalar"}}
+					{{#isEq type "scalar"}}
 						<br />
-						<input type="range" class="form-control" min="0" max="1" step="0.01">
+						<input type="range" class="form-control" min="0" max="1" step="0.01" value="{{value}}">
 					{{/isEq}}
-					{{#isEq this "vector"}}
+					{{#isEq type "vector"}}
 						<br />
-						x: <input type="range" class="form-control" min="0" max="400" step="0.01">
-						y: <input type="range" class="form-control" min="0" max="400" step="0.01">
-						z: <input type="range" class="form-control" min="0" max="400" step="0.01">
+						x: <input type="range" class="form-control" data-axis="x" min="-500" max="500" step="0.01" value="{{value.[0]}}">
+						y: <input type="range" class="form-control" data-axis="y" min="-500" max="500" step="0.01" value="{{value.[1]}}">
+						z: <input type="range" class="form-control" data-axis="z" min="-500" max="500" step="0.01" value="{{value.[2]}}">
 					{{/isEq}}
-					{{#isEq this "quaternion"}}
+					{{#isEq type "quaternion"}}
 						<br />
-						x: <input type="range" class="form-control" min="0" max="1" step="0.01">
-						y: <input type="range" class="form-control" min="0" max="1" step="0.01">
-						z: <input type="range" class="form-control" min="0" max="1" step="0.01">
-						w: <input type="range" class="form-control" min="0" max="1" step="0.01">
+						x: <input type="range" class="form-control" data-axis="x" min="0" max="1" step="0.01" value="{{value.[0]}}">
+						y: <input type="range" class="form-control" data-axis="y" min="0" max="1" step="0.01" value="{{value.[1]}}">
+						z: <input type="range" class="form-control" data-axis="z" min="0" max="1" step="0.01" value="{{value.[2]}}">
+						w: <input type="range" class="form-control" data-axis="w" min="0" max="1" step="0.01" value="{{value.[3]}}">
 					{{/isEq}}
-					{{#isEq this "colour"}}
+					{{#isEq type "colour"}}
 						<br />
-						r: <input type="range" class="form-control" min="0" max="255" step="0.01">
-						g: <input type="range" class="form-control" min="0" max="255" step="0.01">
-						b: <input type="range" class="form-control" min="0" max="255" step="0.01">
+						r: <input type="range" class="form-control" data-axis="r" min="0" max="255" step="1" value="{{value.[0]}}">
+						g: <input type="range" class="form-control" data-axis="g" min="0" max="255" step="1" value="{{value.[1]}}">
+						b: <input type="range" class="form-control" data-axis="b" min="0" max="255" step="1" value="{{value.[2]}}">
 					{{/isEq}}
 				{{/isArray}}
 				</div>

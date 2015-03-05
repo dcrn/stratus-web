@@ -1,4 +1,8 @@
 LightComponent = function(options) {
+	this.applyOptions(options);
+}
+
+LightComponent.prototype.applyOptions = function(options) {
 	this.type = options.type;
 	if (options.type == 'ambient')
 		this.threeobj = new THREE.AmbientLight();

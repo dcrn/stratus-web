@@ -1,11 +1,13 @@
 CameraComponent = function(options) {
 	this.threeobj = new THREE.PerspectiveCamera();
 	this.threeobj.up.set(0, 0, 1);
+	this.applyOptions(options);
+}
 
+CameraComponent.prototype.applyOptions = function(options) {
 	this.setFov(options.fov, true);
 	this.setNear(options.near, true);
 	this.setFar(options.far, true);
-
 	this.threeobj.updateProjectionMatrix();
 }
 

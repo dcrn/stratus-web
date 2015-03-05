@@ -1,4 +1,8 @@
 PhysicsComponent = function(options) {
+	this.applyOptions(options);
+}
+
+PhysicsComponent.prototype.applyOptions = function(options) {
 	if (options.shape == 'sphere')
 		this.shape = new Ammo.btSphereShape(0.5);
 	else if (options.shape == 'cylinder')
