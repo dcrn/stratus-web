@@ -1,8 +1,4 @@
 LightComponent = function(options) {
-	this.applyOptions(options);
-}
-
-LightComponent.prototype.applyOptions = function(options) {
 	this.type = options.type;
 	if (options.type == 'ambient')
 		this.threeobj = new THREE.AmbientLight();
@@ -13,6 +9,10 @@ LightComponent.prototype.applyOptions = function(options) {
 	else
 		this.threeobj = new THREE.PointLight();
 
+	this.applyOptions(options);
+}
+
+LightComponent.prototype.applyOptions = function(options) {
 	this.setColour(options.colour);
 	this.setIntensity(options.intensity);
 	this.setDistance(options.distance);
@@ -127,7 +127,7 @@ Components.register('light', LightComponent, {
 	colour: {type: 'colour', default: 0xFFFFFF},
 	intensity: {type: 'scalar', default: 1.0},
 	distance: {type: 'number', default: 0},
-	angle: {type: 'number', default: Math.PI/3},
+	angle: {type: 'scalar', default: Math.PI/3},
 	exponent: {type: 'number', default: 10.0},
 	castShadow: {type: 'bool', default: false},
 	shadowDarkness: {type: 'scalar', default: 0.5},

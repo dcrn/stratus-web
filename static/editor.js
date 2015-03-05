@@ -195,7 +195,7 @@ Editor.updatePropertiesList = function() {
 	el.append(html);
 
 	$('.proptoggle').click(this.propertiesOnPropToggle);
-	$('.properties_component input, .properties_component select').change(this.propertiesOnChange);
+	$('.properties_component input, .properties_component select').on('change input', this.propertiesOnChange);
 }
 
 // Events:
