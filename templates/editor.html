@@ -69,49 +69,49 @@
 	<script type="application/json" id="gamedata">
 		{{gamedata|safe}}
 	</script>
-	<script type="application/json" id="treedata">
+	<script type="application/json" id="repotree">
 		{{tree|safe}}
 	</script>
 
 	<script type="text/html" id="explorer_template">
 		{% raw %}
-		<ul>
+		<ul class="expl">
 			{{#each scenes}}
-			<li class="explorer_item exp_scene" data-type="scene" data-id="{{@key}}">
+			<li class="exp_scene" data-type="scene" data-id="{{@key}}">
 				<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-folder-open"></span></button>
 				<span class="glyphicon glyphicon-picture"></span>
 				{{@key}}
-				<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+				<button type="button" class="btn btn-link btn-xs actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
 					<span class="glyphicon glyphicon-trash"></span>
 				</button>
-				<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="add" data-toggle="tooltip" data-placement="bottom" title="New Entity">
-					<span class="glyphicon glyphicon-plus"></span>
-				</button>
-				<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
+				<button type="button" class="btn btn-link btn-xs actions" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
 					<span class="glyphicon glyphicon-duplicate"></span>
 				</button>
-				<ul>
+				<button type="button" class="btn btn-link btn-xs actions" data-action="add" data-toggle="tooltip" data-placement="bottom" title="New Entity">
+					<span class="glyphicon glyphicon-plus"></span>
+				</button>
+				<ul class="expl">
 					{{#each entities}}
-					<li class="explorer_item exp_entity" data-type="entity" data-scene="{{@../key}}" data-id="{{@key}}">
+					<li class="exp_entity" data-type="entity" data-scene="{{@../key}}" data-id="{{@key}}">
 						<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-folder-close"></span></button>
 						<span class="glyphicon glyphicon-tree-deciduous"></span>
 						{{@key}}
-						<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+						<button type="button" class="btn btn-link btn-xs actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
 							<span class="glyphicon glyphicon-trash"></span>
 						</button>
-						<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="add" data-toggle="tooltip" data-placement="bottom" title="New Component">
-							<span class="glyphicon glyphicon-plus"></span>
-						</button>
-						<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
+						<button type="button" class="btn btn-link btn-xs actions" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
 							<span class="glyphicon glyphicon-duplicate"></span>
 						</button>
+						<button type="button" class="btn btn-link btn-xs actions" data-action="add" data-toggle="tooltip" data-placement="bottom" title="New Component">
+							<span class="glyphicon glyphicon-plus"></span>
+						</button>
 						
-						<ul style="display:none;">
+						<ul class="expl" style="display:none;">
 							{{#each this}}
-							<li class="explorer_item exp_component" data-type="component" data-scene="{{@../../key}}" data-entity="{{@../key}}" data-id="{{@key}}">
+							<li class="exp_component" data-type="component" data-scene="{{@../../key}}" data-entity="{{@../key}}" data-id="{{@key}}">
 								<span class="glyphicon glyphicon-file"></span>
 								{{@key}} 
-								<button type="button" class="btn btn-link btn-xs explorer_actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+								<button type="button" class="btn btn-link btn-xs actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
 									<span class="glyphicon glyphicon-trash"></span>
 								</button>
 							</li>
@@ -165,10 +165,10 @@
 					{{/isEq}}
 					{{#isEq type "quaternion"}}
 						<br />
-						x: <input type="range" class="form-control" data-axis="x" min="0" max="1" step="0.01" value="{{value.[0]}}">
-						y: <input type="range" class="form-control" data-axis="y" min="0" max="1" step="0.01" value="{{value.[1]}}">
-						z: <input type="range" class="form-control" data-axis="z" min="0" max="1" step="0.01" value="{{value.[2]}}">
-						w: <input type="range" class="form-control" data-axis="w" min="0" max="1" step="0.01" value="{{value.[3]}}">
+						x: <input type="range" class="form-control" data-axis="x" min="-1" max="1" step="0.01" value="{{value.[0]}}">
+						y: <input type="range" class="form-control" data-axis="y" min="-1" max="1" step="0.01" value="{{value.[1]}}">
+						z: <input type="range" class="form-control" data-axis="z" min="-1" max="1" step="0.01" value="{{value.[2]}}">
+						w: <input type="range" class="form-control" data-axis="w" min="-1" max="1" step="0.01" value="{{value.[3]}}">
 					{{/isEq}}
 					{{#isEq type "colour"}}
 						<br />
@@ -186,6 +186,27 @@
 		<br />
 		{% endraw %}
 	</script>
+
+	<script type="text/html" id="components_template">
+		{% raw %}
+			<ul class="expl">
+				{{#each components}}
+				<li data-type="script" data-id="{{@key}}">
+					<span class="glyphicon glyphicon-file"></span> {{@key}}
+					<button type="button" class="btn btn-link btn-xs actions" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+						<span class="glyphicon glyphicon-trash"></span>
+					</button>
+					<button type="button" class="btn btn-link btn-xs actions" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
+						<span class="glyphicon glyphicon-duplicate"></span>
+					</button>
+					<button type="button" class="btn btn-link btn-xs actions" data-action="edit" data-toggle="tooltip" data-placement="bottom" title="Edit">
+						<span class="glyphicon glyphicon-pencil"></span>
+					</button>
+				</li>
+				{{/each}}
+			</ul>
+		{% endraw %}
+	</script>
 	
 	<script>
 	    var texteditor = ace.edit("texteditor");
@@ -194,10 +215,13 @@
 
 	    Editor.init();
 
-		var json;
+		var gamejson, treejson;
 		try {
-			json = JSON.parse(
+			gamejson = JSON.parse(
 				document.getElementById("gamedata").innerHTML
+				);
+			treejson = JSON.parse(
+				document.getElementById("repotree").innerHTML
 				);
 		}
 		catch (e) {
@@ -205,7 +229,7 @@
 			console.log('Game data is corrupt');
 		}
 
-	    Editor.load(json);
+	    Editor.load(gamejson, treejson);
 	    Editor.start();
 	</script>
 </body>

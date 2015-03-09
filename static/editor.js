@@ -35,6 +35,9 @@ Editor.init = function() {
 
 	this.properties_template = Handlebars.compile(
 		$('#properties_template').html());
+
+	this.components_template = Handlebars.compile(
+		$('#components_template').html());
 }
 
 Editor.updateCamera = function() {
@@ -47,8 +50,9 @@ Editor.updateCamera = function() {
 	this.camera.updateProjectionMatrix();
 }
 
-Editor.load = function(gamedata) {
+Editor.load = function(gamedata, repotree) {
 	this.gamedata = gamedata;
+	this.repotree = repotree;
 	this.scenes = Game.load(gamedata);
 
 	if ('config' in gamedata && 'defaultSceneID' in gamedata.config) {
@@ -137,8 +141,8 @@ Editor.updateExplorer = function() {
 	explorer.empty();
 	explorer.append(html);
 
-	$('.explorer_item').click(this.explorerOnClick);
-	$('.listtoggle').click(this.explorerOnListToggle);
+	$('#explorer ul.expl li').click(this.explorerOnClick);
+	$('#explorer ul.expl li .listtoggle').click(this.explorerOnListToggle);
 
 	if (this.selectedScene) {
 		Editor.explorerOnSelect('scene', this.selectedScene);
@@ -148,11 +152,20 @@ Editor.updateExplorer = function() {
 	}
 
 	// jQuery events
-	$('.explorer_actions').tooltip({container:'body'});
+	$('#explorer ul.expl li .actions').tooltip({container:'body'});
+	$('#explorer ul.expl li .actions').click(this.explorerOnActionClick);
 }
 
 Editor.updateComponentList = function() {
+	var components = $('#components');
+	var html = this.components_template(this.repotree);
 
+	components.empty();
+	components.append(html);
+
+	$('#components ul.expl li').click(this.componentsOnClick);
+	$('#components ul.expl li .actions').tooltip({container:'body'});
+	$('#components ul.expl li .actions').click(this.componentsOnActionClick);
 }
 
 Editor.updatePropertiesList = function() {
@@ -200,6 +213,7 @@ Editor.updatePropertiesList = function() {
 
 // Events:
 
+/* Explorer */
 Editor.explorerOnClick = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
@@ -223,7 +237,7 @@ Editor.explorerOnClick = function(e) {
 }
 
 Editor.explorerOnSelect = function(type, s, e, c) {
-	var selector = '.explorer_item[data-type="' + type + '"]';
+	var selector = '#explorer ul.expl li[data-type="' + type + '"]';
 	if (type == 'entity' || type == 'component')
 		selector += '[data-scene="' + s + '"]';
 	if (type == 'component')
@@ -232,13 +246,13 @@ Editor.explorerOnSelect = function(type, s, e, c) {
 	selector += '[data-id="' + (c || e || s) + '"]';
 
 	if (type == 'component')
-		$('.explorer_item.selected[data-type=component]').
+		$('#explorer ul.expl li.selected[data-type=component]').
 			toggleClass('selected');
 	else if (type == 'entity')
-		$('.explorer_item.selected[data-type=entity]').
+		$('#explorer ul.expl li.selected[data-type=entity]').
 			toggleClass('selected');
 	else
-		$('.explorer_item.selected').toggleClass('selected');
+		$('#explorer ul.expl li.selected').toggleClass('selected');
 
 	$(selector).toggleClass('selected');
 }
@@ -254,6 +268,13 @@ Editor.explorerOnListToggle = function(e) {
 	span.toggleClass('glyphicon-folder-close');
 }
 
+Editor.explorerOnActionClick = function(e) {
+	e.preventDefault();
+	e.stopPropagation();
+	
+}
+
+/* Properties */
 Editor.propertiesOnPropToggle = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
@@ -307,4 +328,18 @@ Editor.propertiesOnChange = function(e) {
 		get(comid);
 
 	Components.applyOptions(comid, comobj, com);
+}
+
+/* Components */
+Editor.componentsOnClick = function(e) {
+	e.preventDefault();
+	e.stopPropagation();
+	$('#components ul.expl li.selected').toggleClass('selected');
+	$(this).toggleClass('selected');
+}
+
+Editor.componentsOnActionClick = function(e) {
+	e.preventDefault();
+	e.stopPropagation();
+	
 }

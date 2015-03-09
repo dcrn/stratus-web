@@ -18,8 +18,14 @@ LightComponent.prototype.applyOptions = function(options) {
 	this.setDistance(options.distance);
 	this.setAngle(options.angle);
 	this.setExponent(options.exponent);
-	this.setCastShadow(options.castShadow);
-	this.setShadowDarkness(options.shadowDarkness);
+
+	if (!options.castShadow) {
+		this.setShadowDarkness(0.0);
+	}
+	else {
+		this.setCastShadow(options.castShadow);
+		this.setShadowDarkness(options.shadowDarkness);
+	}
 	this.setShadowCameraNear(options.shadowCameraNear);
 	this.setShadowCameraFar(options.shadowCameraFar);
 	this.setShadowCameraFov(options.shadowCameraFov);
