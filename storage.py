@@ -6,9 +6,9 @@ class Storage:
 		self.addr = addr;
 		self.port = port;
 
-	def call(self, route, method):
+	def call(self, route, method, body=None):
 		conn = HTTPConnection(self.addr, self.port)
-		conn.request(method, route)
+		conn.request(method, route, body)
 		resp = conn.getresponse()
 		
 		return resp.status, resp
@@ -26,33 +26,66 @@ class Storage:
 		j = json.loads(str(re.read(), 'utf-8'))
 		return j
 
+	def create_file(self, user, repo, path):
+		stat, re = self.call('/' + user + '/' + repo + '/file/' + path, 
+			'POST', '{"data":""}')
+
+		return stat == 201
+
+	def delete_file(self, user, repo, path):
+		stat, re = self.call('/' + user + '/' + repo + '/file/' + path, 
+			'DELETE')
+
+		return stat == 200 or stat == 404
+
+	def get_file(self, user, repo, path):
+		stat, re = self.call('/' + user + '/' + repo + '/file/' + path, 
+			'GET')
+
+		if stat != 200:
+			return False
+
+		j = json.loads(str(re.read(), 'utf-8'))
+
+		if 'data' in j:
+			return j['data']
+		else:
+			return j
+
+	def set_file(self, user, repo, path, data):
+		if self.get_file(user, repo, path) == False:
+			if not this.create_file(user, repo, path):
+				return False
+
+		stat, re = self.call('/' + user + '/' + repo + '/file/' + path, 
+			'PUT', json.dumps({'data': data}))
+
+		return stat == 200
+
 	def get_game_files(self, user, repo):
 		baseurl = '/' + user + '/' + repo + '/'
 
-		stat, re = self.call(baseurl + 'tree', 'GET')
-		j = json.loads(str(re.read(), 'utf-8'))
+		tree = self.get_tree(user, repo)
 
-		if (stat != 200 or 'gamedata.json' not in j):
+		if (tree == False or 'gamedata.json' not in tree):
 			return (False, [])
 
 		# List of component filenames
 		cfiles = []
-		if 'components' in j:
-			cfiles = ['components/' + x for x in j['components'].keys()]
+		if 'components' in tree:
+			cfiles = ['components/' + x for x in tree['components'].keys()]
 
 		# Get gamedata.json
-		stat, re = self.call(baseurl + 'file/gamedata.json', 'GET')
-		if stat != 200:
+		gamedata = self.get_file(user, repo, 'gamedata.json')
+		if gamedata == False:
 			return (False, [])
-		gamedata = json.loads(str(re.read(), 'utf-8'))['data']
 
 		# Get component data
 		components = []
 		for f in cfiles:
-			stat, re = self.call(baseurl + 'file/' + f, 'GET')
-			if stat != 200:
+			re = self.get_file(user, repo, f)
+			if re == False:
 				return (False, [])
-
-			components.append(json.loads(str(re.read(), 'utf-8'))['data'])
+			components.append(re)
 		
 		return gamedata, components

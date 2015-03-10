@@ -103,6 +103,30 @@ def editor(repo):
 	else:
 		return error(403, 'Forbidden')
 
+@app.route('/editor/<repo>/<path:file>', methods=['GET', 'POST'])
+def file(repo, file):
+	if ('access_token' not in session):
+		return error(403, 'Forbidden')
+
+	user = session['user_info']['login']
+	if not g.storage.repo_exists(user, repo):
+		return error(404, 'Not Found')
+
+	if request.method == 'GET':
+		data = g.storage.get_file(user, repo, file)
+		if data:
+			return data, 200
+		return error(404, 'Not Found')
+	if request.method == 'POST':
+		if g.storage.set_file(user, repo, file, str(request.get_data(), 'utf-8')):
+			return '', 200
+		return error(500, 'Internal Server Error')
+	if request.method == 'DELETE':
+		if g.storage.delete_file(user, repo, file):
+			return '', 200
+		return error(500, 'Internal Server Error')
+
+
 @app.route('/game/<user>/<repo>')
 def game(user, repo):
 	if ('access_token' in session and
