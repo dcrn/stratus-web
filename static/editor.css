@@ -5,8 +5,6 @@ body, html {
 	line-height: 0px;
 	position: relative;
 }
-.nav-tabs>li { height: 26px; line-height: 0.4em !important; }
-.nav-tabs>li>a { height: 26px; line-height: 0.4em !important; }
 #sidebar {
 	position: absolute;
 	top: 0;
@@ -46,6 +44,20 @@ body, html {
 .tab-pane {
 	position: relative;
 	height: 100%;
+}
+
+
+li[role=presentation] { 
+	height: 26px; 
+	line-height: 26px !important; 
+}
+
+a[role=tab] { 
+	height: 26px; 
+	line-height: 26px !important; 
+	padding: 6px !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
 }
 
 a[role=tab]:hover {
@@ -195,3 +207,4 @@ ul.expl > li:last-child {
 #components ul.expl li {
 	padding-left: 8px;
 }
+

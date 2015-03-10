@@ -29,17 +29,14 @@
 	</div>
 	<div id="main">
 		<div role="tabpanel">
-			<ul class="nav nav-tabs" role="tablist">
+			<ul class="nav nav-tabs" id="tablist" role="tablist">
 				<li role="presentation" class="active">
 					<a data-target="#sceneEditorPanel" aria-controls="sceneEditorPanel" role="tab" data-toggle="tab">Scene Editor</a>
-				</li>
-				<li role="presentation">
-					<a data-target="#phys" aria-controls="phys" role="tab" data-toggle="tab">Script: phys.js</a>
 				</li>
 			</ul>
 		</div>
 
-		<div class="tab-content">
+		<div class="tab-content" id="tabpanels">
 			<div role="tabpanel" class="relative tab-pane active" id="sceneEditorPanel">
 				<div id="sceneEditor">
 				</div>
@@ -47,9 +44,6 @@
 					<div class="properties_header">Entity Properties</div>
 					<div class="text-center">No entity selected</div>
 				</div>
-			</div>
-			<div role="tabpanel" class="relative tab-pane" id="phys">
-				<div id="texteditor">some text</div>
 			</div>
 		</div>
 	</div>
@@ -71,6 +65,24 @@
 	</script>
 	<script type="application/json" id="repotree">
 		{{tree|safe}}
+	</script>
+
+	<script type="text/html" id="scriptnav_template">
+		{% raw %}
+		<li role="presentation" data-filename="{{filename}}" class="active">
+			<a data-target="#{{id}}" aria-controls="phys" role="tab" data-toggle="tab">Script: {{filename}}
+				<button type="button" class="btn btn-link btn-xs closebutton" >
+					<span class="glyphicon glyphicon-remove"></span>
+				</button>
+			</a>
+		</li>
+		{% endraw %}
+	</script>
+
+	<script type="text/html" id="scriptpanel_template">
+		{% raw %}
+		<div role="tabpanel" class="relative tab-pane active" id="{{id}}" data-filename="{{filename}}"></div>
+		{% endraw %}
 	</script>
 
 	<script type="text/html" id="explorer_template">
@@ -209,10 +221,6 @@
 	</script>
 	
 	<script>
-	    var texteditor = ace.edit("texteditor");
-	    //texteditor.setTheme("ace/theme/monokai");
-		texteditor.getSession().setMode("ace/mode/javascript");
-
 	    Editor.init();
 
 		var gamejson, treejson;

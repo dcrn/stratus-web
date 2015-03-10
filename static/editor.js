@@ -38,6 +38,14 @@ Editor.init = function() {
 
 	this.components_template = Handlebars.compile(
 		$('#components_template').html());
+
+	this.scriptnav_template = Handlebars.compile(
+		$('#scriptnav_template').html());
+
+	this.scriptpanel_template = Handlebars.compile(
+		$('#scriptpanel_template').html());
+
+	this.ace_editors = {};
 }
 
 Editor.updateCamera = function() {
@@ -342,4 +350,71 @@ Editor.componentsOnActionClick = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
 	
+	var el = $(this);
+	var parent = el.parent();
+	var filename = parent.data('id');
+	var action = el.data('action');
+
+	if (action == 'edit') {
+		$.ajax({
+			type:'GET', 
+			url: window.location.pathname + 
+				'/components/' + 
+				filename, 
+			success: function(data) {
+				Editor.newScriptTab(filename, data);
+			}
+		});
+	}
+}
+
+Editor.newScriptTab = function(filename, data) {
+	var id = 'script_' + filename.slice(0, -3);
+
+	$('#tablist li[role=presentation].active').
+		toggleClass('active');
+	$('#tabpanels div[role=tabpanel].active').
+		toggleClass('active');
+
+	if ($('#' + id).length > 0) {
+		$('[data-filename="' + filename + '"]').
+			toggleClass('active')
+		return;
+	}
+
+	var tab = this.scriptnav_template({
+		id: id,
+		filename: filename
+	});
+	var panel = this.scriptpanel_template({
+		id: id,
+		filename: filename
+	});
+	$('#tablist').append(tab);
+	$('#tabpanels').append(panel);
+
+	$('#tablist [data-filename="'+filename+'"] .closebutton').click(Editor.closeTab);
+
+	var texteditor = ace.edit(id);
+	texteditor.getSession().setMode("ace/mode/javascript");
+	texteditor.setValue(data);
+	texteditor.clearSelection();
+
+	this.ace_editors[filename] = texteditor;
+}
+
+Editor.closeTab = function(e) {
+	e.preventDefault();
+	e.stopPropagation();
+	
+	var el = $(this).parent().parent();
+	var active = el.hasClass('active');
+	var filename = el.data('filename');
+
+	$('#tablist > [data-filename="'+filename+'"]').remove();
+	$('#tabpanels > [data-filename="'+filename+'"]').remove();
+
+	if (active)
+		$('#tablist > :first-child, #tabpanels > :first-child').
+			toggleClass('active');
 }
