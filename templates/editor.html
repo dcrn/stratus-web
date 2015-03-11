@@ -16,6 +16,9 @@
 					<a data-target="#components" aria-controls="components" role="tab" data-toggle="tab">Components</a>
 				</li>
 			</ul>
+			<div id="settings">
+				<button type="button" class="btn btn-link btn-xs listtoggle"><span class="glyphicon glyphicon-cog"></span></button>
+			</div>
 		</div>
 
 		<div class="tab-content">
@@ -154,6 +157,9 @@
 						{{/each}}
 					</select>
 				{{else}}
+					{{#isEq type "text"}}
+						<input type="text" class="form-control" value="{{value}}">
+					{{/isEq}}
 					{{#isEq type "bool"}}
 						<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
 					{{/isEq}}

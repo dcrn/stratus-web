@@ -115,8 +115,23 @@ Editor.update = function() {
 	}
 }
 
+Editor.onEdit = function() {
+	Editor.lastEdit = Date.now();
+}
+
 Editor.autoSave = function() {
-	var fname
+	if (Editor.lastEdit && Editor.lastEdit < (Date.now() - 3000)) {
+		$.ajax({
+			type:'POST', 
+			data: JSON.stringify(Editor.gamedata), 
+			url: window.location.pathname + 
+				'/gamedata.json'
+		});
+		delete Editor.lastEdit;
+	}
+
+	// Save scripts
+	var fname;
 	for (var fname in Editor.ace_editors) {
 		Editor.saveComponentScript(fname);
 	}
@@ -379,7 +394,7 @@ Editor.propertiesOnChange = function(e) {
 		com[prop] = $(this).prop('checked');
 	else if (type == 'number' || type == 'scalar')
 		com[prop] = Number.parseFloat($(this).val());
-	else if (type == 'list')
+	else if (type == 'list' || type == 'text')
 		com[prop] = $(this).val();
 	else if (type == 'vector' || type == 'quaternion') { // Multi-part inputs
 		var x = Number.parseFloat(el.find('[data-axis=x]').val());
@@ -407,6 +422,8 @@ Editor.propertiesOnChange = function(e) {
 		get(comid);
 
 	Components.applyOptions(comid, comobj, com);
+
+	Editor.onEdit();
 }
 
 /* Components */
@@ -465,7 +482,7 @@ Editor.newScriptTab = function(filename, data) {
 	$('#tablist').append(tab);
 	$('#tabpanels').append(panel);
 
-	$('#tablist [data-filename="'+filename+'"] .closebutton').click(Editor.closeTab);
+	$('#tablist [data-filename="'+filename+'"] .closebutton').click(Editor.onCloseTab);
 
 	var texteditor = ace.edit(id);
 	texteditor.$blockScrolling = Infinity;
@@ -482,7 +499,7 @@ Editor.newScriptTab = function(filename, data) {
 	texteditor.tabElement = tab;
 }
 
-Editor.closeTab = function(e) {
+Editor.onCloseTab = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
 

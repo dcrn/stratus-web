@@ -1,8 +1,6 @@
 TransformComponent = function(options) {
 	this.sub = null;
-	this._scale = new Vector3();
-	this._position = new Vector3();
-	this._rotation = new Quaternion();
+	this.threeobj = new THREE.Object3D();
 
 	this.applyOptions(options);
 }
@@ -14,9 +12,9 @@ TransformComponent.prototype.applyOptions = function(options) {
 }
 
 TransformComponent.prototype.applyTransform = function() {
-	this.setPosition(this._position);
-	this.setRotation(this._rotation);
-	this.setScale(this._scale);
+	this.setPosition(this.threeobj.position);
+	this.setRotation(this.threeobj.quaternion);
+	this.setScale(this.threeobj.scale);
 }
 
 TransformComponent.prototype.subscribe = function(comp) {
@@ -25,50 +23,60 @@ TransformComponent.prototype.subscribe = function(comp) {
 		!comp.getScale || !comp.setScale)
 		return false;
 
+	if (window['Editor'] !== undefined) return false;
+
 	this.sub = comp;
 	this.applyTransform();
+}
+
+TransformComponent.prototype.update = function(dt) {
+	if (this.sub) {
+		this.threeobj.position.copy(this.getPosition());
+		this.threeobj.quaternion.copy(this.getRotation());
+		this.threeobj.scale.copy(this.getScale());
+	}
 }
 
 TransformComponent.prototype.getPosition = function() {
 	if (this.sub)
 		return this.sub.getPosition();
 	else
-		return this._position;
+		return this.threeobj.position;
 }
 
 TransformComponent.prototype.setPosition = function(p) {
 	if (this.sub)
 		this.sub.setPosition(p);
-	else
-		this._position.copy(p);
+	
+	this.threeobj.position.copy(p);
 }
 
 TransformComponent.prototype.getRotation = function() {
 	if (this.sub)
 		return this.sub.getRotation();
 	else
-		return this._rotation;
+		return this.threeobj.quaternion;
 }
 
 TransformComponent.prototype.setRotation = function(q) {
 	if (this.sub)
 		this.sub.setRotation(q);
-	else
-		this._rotation.copy(q);
+	
+	this.threeobj.quaternion.copy(q);
 }
 
 TransformComponent.prototype.getScale = function() {
 	if (this.sub)
 		return this.sub.getScale();
 	else
-		return this._scale;
+		return this.threeobj.scale;
 }
 
 TransformComponent.prototype.setScale = function(v) {
 	if (this.sub)
 		this.sub.setScale(v)
-	else
-		this._scale.copy(v);
+	
+	this.threeobj.scale.copy(v);
 }
 
 Components.register('transform', TransformComponent, {

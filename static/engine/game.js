@@ -20,12 +20,8 @@ Game.loadScene = function(json) {
 	var opt = {}, scene, ent;
 
 	if(json.config) {
-		opt = json.config;
-
-		if ('gravity' in opt) {
-			opt.gravity = new Vector3(opt.gravity.parameters[0],
-				opt.gravity.parameters[1],
-				opt.gravity.parameters[2]);
+		for (x in json.config) {
+			opt[x] = json.config[x];
 		}
 	}
 

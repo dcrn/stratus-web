@@ -1,9 +1,5 @@
 Scene = function(options) {
 	options = options || {};
-
-	if (!('gravity' in options))
-		options.gravity = new Vector3(0, 0, -9.86);
-
 	this.defaultCameraEntityID = options.defaultCameraEntityID;
 
 	this.threeobj = new THREE.Scene();
@@ -20,9 +16,9 @@ Scene = function(options) {
 
 	this.ammoobj.setGravity(
 		new Ammo.btVector3(
-			options.gravity.x,
-			options.gravity.y,
-			options.gravity.z
+			0,
+			0,
+			options.gravity || -9.86
 		)
 	);
 

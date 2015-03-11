@@ -1,4 +1,6 @@
 LightComponent = function(options) {
+	this.target = null;
+
 	this.type = options.type;
 	if (options.type == 'ambient')
 		this.threeobj = new THREE.AmbientLight();
@@ -13,6 +15,9 @@ LightComponent = function(options) {
 }
 
 LightComponent.prototype.applyOptions = function(options) {
+	this.setTarget(options.target);
+	this.targetEntID = options.target;
+
 	this.setColour(options.colour);
 	this.setIntensity(options.intensity);
 	this.setDistance(options.distance);
@@ -32,7 +37,19 @@ LightComponent.prototype.applyOptions = function(options) {
 	this.setShadowCameraVisible(options.shadowCameraVisible);
 }
 
+LightComponent.prototype.setTarget = function (eid) {
+	if (this.entity && eid in this.entity.scene.entities) {
+		this.target = this.entity.scene.entities[eid];
+		this.threeobj.target = this.target.get('transform').threeobj;
+	}
+}
+
 LightComponent.prototype.update = function (dt) {
+	if (!this.target && this.targetEntID) {
+		this.setTarget(this.targetEntID);
+		delete this.targetEntID;
+	}
+	
 	if (!this.entity.has('transform')) return;
 	var transform = this.entity.get('transform');
 
@@ -130,6 +147,7 @@ LightComponent.prototype.setShadowCameraVisible = function(v) {
 
 Components.register('light', LightComponent, {
 	type: {type: ['point', 'spotlight', 'directional', 'ambient'], default: 'point'},
+	target: {type: 'text', default: ''},
 	colour: {type: 'colour', default: 0xFFFFFF},
 	intensity: {type: 'scalar', default: 1.0},
 	distance: {type: 'number', default: 0},

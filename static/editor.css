@@ -44,6 +44,13 @@ body, html {
 	height: 100%;
 }
 
+#settings {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin-top: 2px;
+	margin-right: 2px;
+}
 
 li[role=presentation] { 
 	height: 26px; 
@@ -51,6 +58,14 @@ li[role=presentation] {
 }
 li[role=presentation].error > a { 
 	color: red !important;
+}
+
+li[role=presentation] a > .closebutton { 
+	display: none !important;
+}
+
+li[role=presentation].active a > .closebutton { 
+	display: inline-block !important;
 }
 
 a[role=tab] { 
@@ -187,12 +202,18 @@ ul.expl > li:last-child {
 .properties_component input[type="checkbox"] {
 	float: right;
 	display: inline-block;
-	width: 16px;height: 16px;
+	width: 16px;
+	height: 16px;
 }
 
 .properties_component input[type="range"] {
 	height: 16px;
 	padding: 0;
+}
+
+.properties_component input[type="text"] {
+	height: 24px;
+	padding: 4px;
 }
 
 .properties_component select {
