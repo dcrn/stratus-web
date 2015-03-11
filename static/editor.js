@@ -76,36 +76,6 @@ Editor.start = function() {
 	this.updateExplorer();
 	this.updateComponentList();
 
-	function update() {
-		requestAnimationFrame(update);
-		if (self.activeScene) {
-			for (var entid in self.activeScene.entities) {
-				var ent = self.activeScene.entities[entid];
-				var comps = ent.components();
-
-				for (c in comps) {
-					var com = comps[c];
-					if ('threeobj' in com) {
-						if (ent.has('transform')) {
-							var transform = ent.get('transform');
-							com.threeobj.position.copy(transform.getPosition());
-							com.threeobj.quaternion.copy(transform.getRotation());
-							com.threeobj.scale.copy(transform.getScale());
-						}
-					}
-				}
-			}
-
-			self.renderer.render(
-				self.activeScene.threeobj, 
-				self.camera
-			);
-		}
-	}
-	requestAnimationFrame(update);
-
-	setInterval(Editor.autoSave, 5000);
-
 	window.addEventListener('resize', function(e) {
 		Editor.updateCamera();
 	});
@@ -113,41 +83,101 @@ Editor.start = function() {
 	$('a[data-target="#sceneEditorPanel"]').click(function() {
 		setTimeout(Editor.updateCamera, 100);
 	});
+
+	requestAnimationFrame(Editor.update);
+	setInterval(Editor.autoSave, 5000);
+}
+
+Editor.update = function() {
+	requestAnimationFrame(Editor.update);
+	if (Editor.activeScene) {
+		for (var entid in Editor.activeScene.entities) {
+			var ent = Editor.activeScene.entities[entid];
+			var comps = ent.components();
+
+			for (c in comps) {
+				var com = comps[c];
+				if ('threeobj' in com) {
+					if (ent.has('transform')) {
+						var transform = ent.get('transform');
+						com.threeobj.position.copy(transform.getPosition());
+						com.threeobj.quaternion.copy(transform.getRotation());
+						com.threeobj.scale.copy(transform.getScale());
+					}
+				}
+			}
+		}
+
+		Editor.renderer.render(
+			Editor.activeScene.threeobj, 
+			Editor.camera
+		);
+	}
 }
 
 Editor.autoSave = function() {
-	var e, val, valid;
+	var fname
 	for (var fname in Editor.ace_editors) {
-		e = Editor.ace_editors[fname];
-		val = e.getValue();
-		if (val !== e.lastSavedValue) {
-			console.log('Saving', fname);
-			// Check for errors
+		Editor.saveComponentScript(fname);
+	}
+}
 
-			valid = true;
-			try {
-				eval(val);
-			}
-			catch (err) {
-				valid = false;
-				console.log(err);
-			}
+Editor.saveComponentScript = function(filename) {
+	var edit = Editor.ace_editors[filename];
+	if (edit) {
+		var val = edit.getValue();
 
-			if (valid) {
-				$.ajax({
-					type:'POST', 
-					data: val, 
-					url: window.location.pathname + 
-						'/components/' + 
-						fname, 
-					success: function(data) {
-						console.log(data);
-					}
-				});
-				e.lastSavedValue = val;
-			}
+		if (val !== edit.lastSavedValue) {
+			if (!Editor.validateComponentScript(edit))
+				return false;
+
+			$.ajax({
+				type:'POST', 
+				data: val, 
+				url: window.location.pathname + 
+					'/components/' + 
+					filename
+			});
+
+			edit.lastSavedValue = val;
 		}
 	}
+	return true;
+}
+
+Editor.validateComponentScript = function(edit) {
+	var val = edit.getValue();
+	var tab = edit.tabElement
+
+	try {
+		eval(val);
+	}
+	catch (err) {
+		var popover = tab.data('bs.popover');
+		if (popover) {
+			popover.options.content = err.toString();
+			if (popover.$tip && popover.$tip.hasClass('in')) {
+				tab.popover('show');
+			}
+		}
+		else {
+			tab.popover({
+				container: 'body',
+				title: 'JavaScript Error',
+				content: err.toString(),
+				trigger: 'hover',
+				placement: 'bottom'
+			});
+		}
+
+		tab.toggleClass('error', true);
+		return false;
+	}
+
+	edit.tabElement.toggleClass('error', false);
+	edit.tabElement.popover('destroy');
+
+	return true;
 }
 
 Editor.setActiveScene = function(s) {
@@ -423,37 +453,48 @@ Editor.newScriptTab = function(filename, data) {
 		return;
 	}
 
-	var tab = this.scriptnav_template({
+	var tab = $(this.scriptnav_template({
 		id: id,
 		filename: filename
-	});
-	var panel = this.scriptpanel_template({
+	}));
+	var panel = $(this.scriptpanel_template({
 		id: id,
 		filename: filename
-	});
+	}));
+
 	$('#tablist').append(tab);
 	$('#tabpanels').append(panel);
 
 	$('#tablist [data-filename="'+filename+'"] .closebutton').click(Editor.closeTab);
 
 	var texteditor = ace.edit(id);
+	texteditor.$blockScrolling = Infinity;
 	texteditor.getSession().setMode("ace/mode/javascript");
 	texteditor.setValue(data);
 	texteditor.clearSelection();
+	texteditor.focus();
+	texteditor.on('change', function(e) {
+		Editor.validateComponentScript(texteditor);
+	});
 
 	this.ace_editors[filename] = texteditor;
 	texteditor.lastSavedValue = data;
+	texteditor.tabElement = tab;
 }
 
 Editor.closeTab = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
 
-	Editor.autoSave();
-	
 	var el = $(this).parent().parent();
 	var active = el.hasClass('active');
 	var filename = el.data('filename');
+
+	var save = Editor.saveComponentScript(filename);
+	if (!save) {
+		el.popover('show');
+		return;
+	}
 
 	delete Editor.ace_editors[filename];
 

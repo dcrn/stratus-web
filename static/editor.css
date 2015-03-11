@@ -49,6 +49,9 @@ li[role=presentation] {
 	height: 26px; 
 	line-height: 26px !important; 
 }
+li[role=presentation].error > a { 
+	color: red !important;
+}
 
 a[role=tab] { 
 	height: 26px; 
