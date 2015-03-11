@@ -52,10 +52,10 @@ Editor.updateCamera = function() {
 	var w = $('#sceneEditor').width();
 	var h = $('#sceneEditor').height();
 
-	this.renderer.setSize(w, h);
+	Editor.renderer.setSize(w, h);
 
-	this.camera.aspect = w / h;
-	this.camera.updateProjectionMatrix();
+	Editor.camera.aspect = w / h;
+	Editor.camera.updateProjectionMatrix();
 }
 
 Editor.load = function(gamedata, repotree) {
@@ -104,9 +104,50 @@ Editor.start = function() {
 	}
 	requestAnimationFrame(update);
 
+	setInterval(Editor.autoSave, 5000);
+
 	window.addEventListener('resize', function(e) {
-		self.updateCamera();
+		Editor.updateCamera();
 	});
+
+	$('a[data-target="#sceneEditorPanel"]').click(function() {
+		setTimeout(Editor.updateCamera, 100);
+	});
+}
+
+Editor.autoSave = function() {
+	var e, val, valid;
+	for (var fname in Editor.ace_editors) {
+		e = Editor.ace_editors[fname];
+		val = e.getValue();
+		if (val !== e.lastSavedValue) {
+			console.log('Saving', fname);
+			// Check for errors
+
+			valid = true;
+			try {
+				eval(val);
+			}
+			catch (err) {
+				valid = false;
+				console.log(err);
+			}
+
+			if (valid) {
+				$.ajax({
+					type:'POST', 
+					data: val, 
+					url: window.location.pathname + 
+						'/components/' + 
+						fname, 
+					success: function(data) {
+						console.log(data);
+					}
+				});
+				e.lastSavedValue = val;
+			}
+		}
+	}
 }
 
 Editor.setActiveScene = function(s) {
@@ -401,15 +442,20 @@ Editor.newScriptTab = function(filename, data) {
 	texteditor.clearSelection();
 
 	this.ace_editors[filename] = texteditor;
+	texteditor.lastSavedValue = data;
 }
 
 Editor.closeTab = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
+
+	Editor.autoSave();
 	
 	var el = $(this).parent().parent();
 	var active = el.hasClass('active');
 	var filename = el.data('filename');
+
+	delete Editor.ace_editors[filename];
 
 	$('#tablist > [data-filename="'+filename+'"]').remove();
 	$('#tabpanels > [data-filename="'+filename+'"]').remove();
