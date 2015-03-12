@@ -45,6 +45,9 @@ Editor.init = function() {
 	this.scriptpanel_template = Handlebars.compile(
 		$('#scriptpanel_template').html());
 
+	this.inputpopup_template = Handlebars.compile(
+		$('#inputpopup_template').html());
+
 	this.ace_editors = {};
 }
 
@@ -366,6 +369,75 @@ Editor.explorerOnActionClick = function(e) {
 	e.preventDefault();
 	e.stopPropagation();
 	
+	var el = $(this);
+	var parent = el.parent();
+
+	var id = parent.data('id');
+	var type = parent.data('type');
+	var scene = parent.data('scene');
+	var entity = parent.data('entity');
+
+	var action = el.data('action');
+
+	if (type == 'scene') {
+		if (action == 'add') {
+			Editor.showInputPopup({
+				title: 'New Entity',
+				inputs: {
+					ID: {
+						type: 'text',
+						value: ''
+					}
+				}
+			},
+			function(e) {
+				if (!(e.ID in Editor.gamedata)) {
+					Editor.gamedata.scenes[id].entities[e.ID] = {};
+					Game.scenes[id].add(e.ID, new Entity());
+
+					Editor.updateExplorer();
+					Editor.onEdit();
+				}
+			});
+		}
+		else if (action == 'duplicate') {
+
+		}
+		else if (action == 'delete') {
+			Editor.showInputPopup({
+				title: 'Delete scene ' + id + '?',
+				inputs: {}
+			},
+			function(e) {
+				delete Editor.gamedata.scenes[id];
+
+				Editor.onEdit();
+				Editor.updateExplorer();
+			});
+		}
+	}
+}
+
+Editor.showInputPopup = function(options, callback) {
+	var html = $(Editor.inputpopup_template(options));
+	html.modal('show');
+
+	html.find('button.cancel').click(function () {
+		html.modal('hide');
+		html.remove();
+	});
+
+	html.find('button.okay').click(function () {
+		var ret = {};
+		html.find('.form-group').each(function(el) {
+			ret[$(this).data('id')] = 
+				$(this).find('input').val();
+		});;
+		callback(ret);
+
+		html.modal('hide');
+		html.remove();
+	});
 }
 
 /* Properties */
@@ -453,6 +525,12 @@ Editor.componentsOnActionClick = function(e) {
 				Editor.newScriptTab(filename, data);
 			}
 		});
+	}
+	else if (action == 'duplicate') {
+		console.log('Not implemented');
+	}
+	else if (action == 'delete') {
+		console.log('Not implemented');
 	}
 }
 

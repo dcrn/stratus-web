@@ -60,11 +60,11 @@ li[role=presentation].error > a {
 	color: red !important;
 }
 
-li[role=presentation] a > .closebutton { 
+li[role=presentation] a > .actions { 
 	display: none !important;
 }
 
-li[role=presentation].active a > .closebutton { 
+li[role=presentation].active a > .actions { 
 	display: inline-block !important;
 }
 

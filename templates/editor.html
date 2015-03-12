@@ -10,10 +10,20 @@
 		<div role="tabpanel">
 			<ul class="nav nav-tabs" role="tablist">
 				<li role="presentation" class="active">
-					<a data-target="#explorer" aria-controls="explorer" role="tab" data-toggle="tab">Explorer</a>
+					<a data-target="#explorer" aria-controls="explorer" role="tab" data-toggle="tab">
+						Explorer
+						<button type="button" class="btn btn-link btn-xs actions">
+							<span class="glyphicon glyphicon-plus"></span>
+						</button>
+					</a>
 				</li>
 				<li role="presentation">
-					<a data-target="#components" aria-controls="components" role="tab" data-toggle="tab">Components</a>
+					<a data-target="#components" aria-controls="components" role="tab" data-toggle="tab">
+						Components
+						<button type="button" class="btn btn-link btn-xs actions">
+							<span class="glyphicon glyphicon-plus"></span>
+						</button>
+					</a>
 				</li>
 			</ul>
 			<div id="settings">
@@ -70,7 +80,7 @@
 		{% raw %}
 		<li role="presentation" data-filename="{{filename}}" class="active">
 			<a data-target="#{{id}}" aria-controls="phys" role="tab" data-toggle="tab">Script: {{filename}}
-				<button type="button" class="btn btn-link btn-xs closebutton" >
+				<button type="button" class="btn btn-link btn-xs closebutton actions" >
 					<span class="glyphicon glyphicon-remove"></span>
 				</button>
 			</a>
@@ -219,6 +229,37 @@
 				</li>
 				{{/each}}
 			</ul>
+		{% endraw %}
+	</script>
+
+	<script type="text/html" id="inputpopup_template">
+		{% raw %}
+			<div class="modal fade">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4 class="modal-title">{{title}}</h4>
+						</div>
+						<div class="modal-body">
+							{{#each inputs}}
+								<div class="form-group" data-id="{{@key}}">
+									<label>{{@key}}</label>
+									{{#isEq type "text"}}
+										<input type="text" class="form-control" value="{{value}}">
+									{{/isEq}}
+									{{#isEq type "bool"}}
+										<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
+									{{/isEq}}
+								</div>
+							{{/each}}
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default cancel">Cancel</button>
+							<button type="button" class="btn btn-primary okay">Okay</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		{% endraw %}
 	</script>
 	
