@@ -64,6 +64,10 @@ Components.applyOptions = function(comid, comobj, options) {
 		);
 }
 
+Components.components = function() {
+	return this.comps;
+}
+
 Components.list = function() {
 	return Object.keys(this.comps);
 }

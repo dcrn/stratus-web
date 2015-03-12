@@ -102,6 +102,29 @@ a[role=tab]:hover {
 	height: 100%;
 }
 
+/* Forms */
+input.form-control[type="checkbox"] {
+	float: right;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+}
+
+input.form-control[type="range"] {
+	height: 16px;
+	padding: 0;
+}
+
+input.form-control[type="text"] {
+	height: 24px;
+	padding: 4px;
+}
+
+select.form-control {
+	padding: 0px;
+	height: 24px;
+}
+
 /* Lists */
 ul.expl li {
 	display: block;
@@ -197,28 +220,6 @@ ul.expl > li:last-child {
 
 .properties_component h4 span {
 	padding: 4px;
-}
-
-.properties_component input[type="checkbox"] {
-	float: right;
-	display: inline-block;
-	width: 16px;
-	height: 16px;
-}
-
-.properties_component input[type="range"] {
-	height: 16px;
-	padding: 0;
-}
-
-.properties_component input[type="text"] {
-	height: 24px;
-	padding: 4px;
-}
-
-.properties_component select {
-	padding: 0px;
-	height: 24px;
 }
 
 .properties_header {

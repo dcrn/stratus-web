@@ -11,6 +11,11 @@ Editor.init = function() {
 	this.camera.position.set(0, -100, 40);
 	this.camera.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2.5);
 
+	this.selectionMesh = new THREE.Mesh(
+		new THREE.BoxGeometry(1, 1, 1),
+		new THREE.MeshBasicMaterial({wireframe: true})
+	);
+
 	this.updateCamera();
 
 	// Handlebars setup
@@ -59,6 +64,34 @@ Editor.updateCamera = function() {
 
 	Editor.camera.aspect = w / h;
 	Editor.camera.updateProjectionMatrix();
+}
+
+Editor.updateSelection = function() {
+	if (this.selectedEntity && this.selectedScene) {
+		var ent = Game.scenes[this.selectedScene].entities[
+			this.selectedEntity];
+		var trans = ent.get('transform');
+		var mesh = ent.get('mesh');
+
+		if (!mesh) {
+			this.selectionMesh.geometry = new THREE.BoxGeometry(1, 1, 1);
+		}
+		else {
+			this.selectionMesh.geometry = mesh.threeobj.geometry;
+		}
+
+		if (!trans) {
+			this.selectionMesh.position.set(0, 0, 0);
+			this.selectionMesh.quaternion.set(0, 0, 0, 1);
+			this.selectionMesh.scale.set(1, 1, 1);
+		}
+		else {
+			this.selectionMesh.position.copy(trans.getPosition());
+			this.selectionMesh.quaternion.copy(trans.getRotation());
+			this.selectionMesh.scale.copy(trans.getScale());
+			this.selectionMesh.scale.add(new Vector3(2.0, 2.0, 2.0));
+		}
+	}
 }
 
 Editor.load = function(gamedata, repotree) {
@@ -123,7 +156,7 @@ Editor.onEdit = function() {
 }
 
 Editor.autoSave = function() {
-	if (Editor.lastEdit && Editor.lastEdit < (Date.now() - 3000)) {
+	if (Editor.lastEdit && Editor.lastEdit < (Date.now() - 1000)) {
 		$.ajax({
 			type:'POST', 
 			data: JSON.stringify(Editor.gamedata), 
@@ -199,7 +232,11 @@ Editor.validateComponentScript = function(edit) {
 }
 
 Editor.setActiveScene = function(s) {
+	if (this.activeScene) {
+		this.activeScene.threeobj.remove(this.selectionMesh);
+	}
 	this.activeScene = s;
+	this.activeScene.threeobj.add(this.selectionMesh);
 }
 
 Editor.getActiveScene = function(s) {
@@ -218,6 +255,8 @@ Editor.selectScene = function(s) {
 Editor.selectEntity = function(s, e) {
 	this.selectScene(s);
 	this.selectedEntity = e;
+
+	this.updateSelection();
 
 	Editor.explorerOnSelect('entity', s, e);
 	this.updatePropertiesList();
@@ -241,12 +280,14 @@ Editor.updateExplorer = function() {
 	$('#explorer ul.expl li').click(this.explorerOnClick);
 	$('#explorer ul.expl li .listtoggle').click(this.explorerOnListToggle);
 
-	if (this.selectedScene) {
+	if (this.selectedScene)
 		Editor.explorerOnSelect('scene', this.selectedScene);
 
-		if (this.selectedEntity)
-			Editor.explorerOnSelect('entity', this.selectedScene, this.selectedEntity);
-	}
+	if (this.selectedEntity)
+		Editor.explorerOnSelect('entity', this.selectedScene, this.selectedEntity);
+
+	if (this.selectedComponent)
+		Editor.explorerOnSelect('entity', this.selectedScene, this.selectedEntity, this.selectedComponent);
 
 	// jQuery events
 	$('#explorer ul.expl li .actions').tooltip({container:'body'});
@@ -401,7 +442,7 @@ Editor.explorerOnActionClick = function(e) {
 			});
 		}
 		else if (action == 'duplicate') {
-
+			console.log('Not implemented');
 		}
 		else if (action == 'delete') {
 			Editor.showInputPopup({
@@ -410,15 +451,79 @@ Editor.explorerOnActionClick = function(e) {
 			},
 			function(e) {
 				delete Editor.gamedata.scenes[id];
+				Editor.onEdit();
+				Editor.updateExplorer();
+
+				$('#explorer .expl > li[data-type=scene]:first-child').click();
+			});
+		}
+	}
+	else if (type == 'entity') {
+		if (action == 'add') {
+			var complist = Components.components();
+			var inputlist = {};
+			for (var c in complist) {
+				inputlist[c] = {type: 'bool', value: ''};
+			}
+
+			Editor.showInputPopup({
+				title: 'Add Component to ' + id,
+				inputs: inputlist
+			},
+			function(e) {
+				for(var com in e) {
+					if (e[com] === true) {
+						Editor.gamedata.scenes[scene].entities[id][com] = {};
+						Editor.scenes[scene].entities[id].add(
+							Components.create(com)
+						);
+
+						Editor.onEdit();
+						Editor.updateExplorer();
+					}
+				}
+			});
+		}
+		else if (action == 'duplicate') {
+			console.log('Not implemented');
+		}
+		else if (action == 'delete') {
+			Editor.showInputPopup({
+				title: 'Delete entity ' + id + '?'
+			},
+			function(e) {
+				delete Editor.gamedata.scenes[scene].entities[id];
+				Editor.scenes[scene].remove(id);
 
 				Editor.onEdit();
 				Editor.updateExplorer();
+
+				$('#explorer ul.expl > li[data-id='+scene+'] li[data-type=entity]:first-child').click();
 			});
 		}
+	}
+	else if (type == 'component' && action == 'delete') {
+		Editor.showInputPopup({
+			title: 'Delete component ' + id + '?'
+		},
+		function(e) {
+			delete Editor.gamedata.scenes[scene].entities[entity][id];
+			var ent = Editor.scenes[scene].entities[entity]
+			ent.remove(ent.get(id));
+
+			Editor.onEdit();
+			Editor.updateExplorer();
+
+			$('#explorer ul.expl > li[data-id='+scene+'] li[data-type=entity]:first-child').click();
+		});
 	}
 }
 
 Editor.showInputPopup = function(options, callback) {
+	options = options || {};
+	options.title = options.title || '';
+	options.inputs = options.inputs || {};
+
 	var html = $(Editor.inputpopup_template(options));
 	html.modal('show');
 
@@ -430,8 +535,12 @@ Editor.showInputPopup = function(options, callback) {
 	html.find('button.okay').click(function () {
 		var ret = {};
 		html.find('.form-group').each(function(el) {
-			ret[$(this).data('id')] = 
-				$(this).find('input').val();
+			var property = $(this).data('property');
+
+			if (options.inputs[property].type == 'bool')
+				ret[property] = $(this).find('input').prop('checked');
+			else
+				ret[property] = $(this).find('input').val();
 		});;
 		callback(ret);
 
@@ -496,6 +605,7 @@ Editor.propertiesOnChange = function(e) {
 	Components.applyOptions(comid, comobj, com);
 
 	Editor.onEdit();
+	Editor.updateSelection();
 }
 
 /* Components */
@@ -564,7 +674,7 @@ Editor.newScriptTab = function(filename, data) {
 
 	var texteditor = ace.edit(id);
 	texteditor.$blockScrolling = Infinity;
-	texteditor.getSession().setMode("ace/mode/javascript");
+	texteditor.getSession().setMode('ace/mode/javascript');
 	texteditor.setValue(data);
 	texteditor.clearSelection();
 	texteditor.focus();
