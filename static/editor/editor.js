@@ -4,6 +4,7 @@ Editor.init = function(gamedata, repodata) {
 	this.repodata = repodata;
 	this.selection = {};
 	this.scriptviews = {};
+	this.unsaved = false;
 
 	// Set up Handlebars helpers
 	Handlebars.registerHelper('eq', 
@@ -36,6 +37,10 @@ Editor.init = function(gamedata, repodata) {
 	// Start autosaving
 	window.addEventListener('blur', this.autoSave.bind(this));
 	setInterval(this.autoSave.bind(this), 6000);
+}
+
+Editor.modified = function() {
+	this.unsaved = true;
 }
 
 Editor.selectScene = function(s) {
@@ -75,15 +80,20 @@ Editor.changeProperty = function(comid, prop, val) {
 			comid, ent[comid]
 		);
 	}
+
+	this.modified();
 }
 
 Editor.autoSave = function() {
-	$.ajax({
-		type:'POST', 
-		data: JSON.stringify(this.gamedata), 
-		url: window.location.pathname + 
-			'/gamedata.json'
-	});
+	if (this.unsaved) {
+		$.ajax({
+			type:'POST', 
+			data: JSON.stringify(this.gamedata), 
+			url: window.location.pathname + 
+				'/gamedata.json'
+		});
+		this.unsaved = false;
+	}
 }
 
 Editor.saveScript = function(filename) {
