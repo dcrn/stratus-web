@@ -5,19 +5,21 @@
 			<div class="modal-header">
 				<h4 class="modal-title">{{title}}</h4>
 			</div>
+			{{#if inputs}}
 			<div class="modal-body">
 				{{#each inputs}}
 				<div class="form-group" data-property="{{@key}}">
 					<label>{{@key}}</label>
-					{{#isEq type "text"}}
+					{{#eq type "text"}}
 					<input type="text" class="form-control" value="{{value}}">
-					{{/isEq}}
-					{{#isEq type "bool"}}
+					{{/eq}}
+					{{#eq type "bool"}}
 					<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
-					{{/isEq}}
+					{{/eq}}
 				</div>
 				{{/each}}
 			</div>
+			{{/if}}
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default cancel">Cancel</button>
 				<button type="button" class="btn btn-primary okay">Okay</button>

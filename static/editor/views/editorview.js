@@ -7,6 +7,11 @@ EditorView = function() {
 	this.main = new MainView();
 }
 
+EditorView.prototype.showModalInput = function(opt) {
+	var v = new ModalInputView(opt);
+	v.show();
+}
+
 EditorView.prototype.render = function() {
 	this.$el.empty();
 

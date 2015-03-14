@@ -36,11 +36,6 @@ Editor.init = function(gamedata, repodata) {
 
 	// Start autosaving
 	window.addEventListener('blur', this.autoSave.bind(this));
-	setInterval(this.autoSave.bind(this), 6000);
-}
-
-Editor.modified = function() {
-	this.unsaved = true;
 }
 
 Editor.selectScene = function(s) {
@@ -84,16 +79,20 @@ Editor.changeProperty = function(comid, prop, val) {
 	this.modified();
 }
 
+Editor.modified = function() {
+	if (this.savetimer) 
+		clearTimeout(this.savetimer);
+
+	this.savetimer = setTimeout(this.autoSave.bind(this), 4000);
+}
+
 Editor.autoSave = function() {
-	if (this.unsaved) {
-		$.ajax({
-			type:'POST', 
-			data: JSON.stringify(this.gamedata), 
-			url: window.location.pathname + 
-				'/gamedata.json'
-		});
-		this.unsaved = false;
-	}
+	$.ajax({
+		type:'POST', 
+		data: JSON.stringify(this.gamedata), 
+		url: window.location.pathname + 
+			'/gamedata.json'
+	});
 }
 
 Editor.saveScript = function(filename) {
@@ -140,4 +139,178 @@ Editor.editScript = function(filename) {
 			);
 		}
 	});
+}
+
+Editor.deleteScript = function(filename) {
+	var self = this;
+	this.view.showModalInput({
+		title: 'Delete ' + filename + '?',
+		callback: function() {
+			$.ajax({
+				type: 'DELETE',
+				url: window.location.pathname + 
+					'/components/' + filename,
+				success: function() {
+					delete self.repodata.components[filename];
+					self.view.explorer.scripts.setData(self.repodata.components);
+				}
+			});
+		}
+	});
+}
+
+Editor.newScript = function() {
+	var self = this;
+	this.view.showModalInput({
+		title: 'New Script Component',
+		inputs: {filename: {type: 'text', value: ''}},
+		callback: function(val) {
+			var filename = val.filename.trim();
+			if (filename == '') return;
+			if (filename.slice(-3) !== '.js')
+				filename += '.js';
+
+			$.ajax({
+				type:'POST', 
+				data: '', 
+				url: window.location.pathname + 
+					'/components/' + filename,
+				success: function() {
+					self.repodata.components[filename] = true;
+					self.view.explorer.scripts.setData(self.repodata.components);
+				}
+			});
+		}
+	});
+}
+
+Editor.newScene = function() {
+	var self = this;
+	this.view.showModalInput({
+		title: 'New Scene',
+		inputs: {ID: {type: 'text', value: ''}},
+		callback: function(val) {
+			self.gamedata.scenes[val.ID] = {entities:{}};
+			self.view.main.scene.addScene(val.ID);
+			self.view.explorer.scenes.addItem(null, null, 'scene', val.ID, {});
+
+			self.selectScene(val.ID);
+			self.modified();
+		}
+	});
+}
+
+Editor.performAction = function(type, action) {
+	var self = this;
+
+	if (type == 'scene') {
+		if (action == 'add') {
+			var sc = this.gamedata.scenes[this.selection.scene];
+			this.view.showModalInput({
+				title: 'New Entity',
+				inputs: {ID: {type: 'text', value: ''}},
+				callback: function(val) {
+					sc.entities[val.ID] = {transform:{}};
+					self.view.explorer.scenes.addItem(
+						self.selection.scene, 
+						null, 
+						'entity', 
+						val.ID, 
+						{}
+					);
+					self.view.explorer.scenes.addItem(
+						self.selection.scene, val.ID, 'component', 'transform', {}
+					);
+					self.view.main.scene.addEntity(self.selection.scene, val.ID);
+					self.view.main.scene.addComponent(self.selection.scene, val.ID, 'transform');
+					self.modified();
+				}
+			});
+		}
+		else if (action == 'delete') {
+			this.view.showModalInput({
+				title: 'Delete ' + this.selection.scene + '?',
+				callback: function(val) {
+					delete self.gamedata.scenes[self.selection.scene];
+					self.view.explorer.scenes.removeItem('scene', self.selection.scene);
+					self.view.main.scene.removeScene(self.selection.scene);
+					self.selectScene(null);
+					self.modified();
+				}
+			});
+		}
+		else if (action == 'duplicate') {
+			console.log('Not implemented');
+		}
+	}
+	else if (type == 'entity') {
+		if (action == 'add') {
+			var sc = this.gamedata.scenes[this.selection.scene];
+			var ent = sc.entities[this.selection.entity];
+
+			this.view.showModalInput({
+				title: 'Add Component',
+				inputs: {Component: {type: 'text', value: ''}},
+				callback: function(val) {
+					ent[val.Component] = {};
+					self.view.explorer.scenes.addItem(
+						self.selection.scene, 
+						self.selection.entity, 
+						'component',
+						val.Component, 
+						{}
+					);
+					self.view.main.scene.addComponent(self.selection.scene, self.selection.entity, val.Component);
+					self.view.main.properties.setData(ent);
+					self.modified();
+				}
+			});
+		}
+		else if (action == 'delete') {
+			this.view.showModalInput({
+				title: 'Delete ' + this.selection.entity + '?',
+				callback: function(val) {
+					delete self.gamedata.scenes[self.selection.scene].entities[self.selection.entity];
+					self.view.explorer.scenes.removeItem('entity', self.selection.scene, self.selection.entity);
+					self.view.main.scene.removeEntity(self.selection.scene, self.selection.entity);
+					self.selectEntity(null);
+					self.modified();
+				}
+			});
+		}
+		else if (action == 'duplicate') {
+			console.log('Not implemented');
+		}
+	}
+	else if (type == 'component') {
+		if (action == 'delete') {
+			this.view.showModalInput({
+				title: 'Delete ' + this.selection.component + '?',
+				callback: function(val) {
+					delete self.gamedata.scenes[self.selection.scene].
+						entities[self.selection.entity]
+						[self.selection.component];
+
+					self.view.main.properties.setData(
+						self.gamedata.scenes
+							[self.selection.scene].
+							entities[self.selection.entity]
+					);
+
+					self.view.explorer.scenes.removeItem('component', 
+						self.selection.scene, 
+						self.selection.entity, 
+						self.selection.component);
+
+					self.view.main.scene.removeComponent(
+						self.selection.scene, 
+						self.selection.entity, 
+						self.selection.component);
+
+					self.selectComponent(null);
+					self.modified();
+				}
+			});
+		}
+	}
 }

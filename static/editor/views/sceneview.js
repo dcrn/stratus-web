@@ -34,8 +34,12 @@ SceneView.prototype.setActiveScene = function(sid) {
 	if (old) {
 		old.threeobj.remove(this.selectionMesh);
 	}
-	this.game[sid].activate();
-	this.game[sid].threeobj.add(this.selectionMesh);
+
+	var sc = this.game[sid];
+	if (sc) {
+		sc.activate();
+		sc.threeobj.add(this.selectionMesh);
+	}
 
 	this.setSelection(null);
 }
@@ -52,6 +56,51 @@ SceneView.prototype.setSelection = function(eid) {
 	}
 
 	this.selectionMesh.visible = false;
+}
+
+SceneView.prototype.addScene = function(sid) {
+	this.game[sid] = new Scene();
+}
+
+SceneView.prototype.addEntity = function(sid, entid) {
+	var sc = this.game[sid];
+	if (!sc) return;
+	sc.add(entid, new Entity());
+}
+
+SceneView.prototype.addComponent = function(sid, entid, comid) {
+	var sc = this.game[sid];
+	if (!sc) return;
+	var ent = sc.entities[entid];
+	if (!ent) return;
+
+	var com = Components.create(comid);
+	ent.add(com);
+}
+
+SceneView.prototype.removeScene = function(sid) {
+	this.setActiveScene(null);
+	delete this.game[sid];
+}
+
+SceneView.prototype.removeEntity = function(sid, entid) {
+	this.setSelection(null);
+
+	var sc = this.game[sid];
+	if (!sc) return;
+
+	this.game[sid].remove(entid);
+}
+
+SceneView.prototype.removeComponent = function(sid, entid, comid) {
+	var sc = this.game[sid];
+	if (!sc) return;
+	var ent = sc.entities[entid];
+	if (!ent) return;
+
+	var com = this.game[sid].entities[entid].get(comid);
+	if (com)
+		this.game[sid].entities[entid].remove(com);
 }
 
 SceneView.prototype.updateProperty = function(sid, entid, comid, options) {
@@ -90,6 +139,8 @@ SceneView.prototype.update = function() {
 
 	if (this.selection) {
 		if (this.selection.has('transform')) {
+			this.selectionMesh.visible = true;
+
 			var t = this.selection.get('transform');
 			this.selectionMesh.position.copy(
 				t.getPosition()
@@ -105,6 +156,7 @@ SceneView.prototype.update = function() {
 			);
 		}
 		else {
+			this.selectionMesh.visible = false;
 			this.selectionMesh.position.set(0, 0, 0);
 			this.selectionMesh.quaternion.set(0, 0, 0, 1);
 			this.selectionMesh.scale.set(1, 1, 1);

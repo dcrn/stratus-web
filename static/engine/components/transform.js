@@ -81,6 +81,6 @@ TransformComponent.prototype.setScale = function(v) {
 
 Components.register('transform', TransformComponent, {
 	position: {type: 'vector', default: [0, 0, 0]},
-	scale: {type: 'vector', default: [0, 0, 0]},
+	scale: {type: 'vector', default: [1, 1, 1]},
 	rotation: {type: 'quaternion', default: [0, 0, 0, 1]}
 });

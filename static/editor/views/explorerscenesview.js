@@ -5,41 +5,72 @@ ExplorerScenesView = function(type) {
 	this.views = [];
 }
 
+ExplorerScenesView.prototype.addItem = function(scene, entity, type, id, data) {
+		// addItem(null, null, 'scene', 'scene6', {entities:{}}
+	if (type !== this.type) {
+		for (var i = 0; i < this.views.length; i++) {
+			var v = this.views[i];
+			if (v.type === 'scene' && v.id === scene ||
+				v.type === 'entity' && v.id === entity) {
+				v.listview.addItem(scene, entity, type, id, data);
+				break;
+			}
+		}
+	}
+	else {
+		var lv;
+		if (type === 'scene')
+			lv = new ExplorerScenesView('entity');
+		else if (type === 'entity')
+			lv = new ExplorerScenesView('component');
+
+		if (lv && data) {
+			lv.setData(data);
+		}
+
+		var v = new ExplorerScenesItemView({
+			id: id,
+			type: type,
+			listview: lv
+		});
+
+		this.views.push(v);
+		this.$el.append(v.render());
+	}
+}
+
+ExplorerScenesView.prototype.removeItem = function(type, scene, entity, component) {
+	if (type !== this.type) {
+		for (var i = 0; i < this.views.length; i++) {
+			var v = this.views[i]
+			if (v.type === 'scene' && v.id === scene ||
+				v.type === 'entity' && v.id === entity) {
+				v.listview.removeItem(type, scene, entity, component);
+				break;
+			}
+		}
+	}
+	else {
+		var x = {scene:scene, entity:entity, component:component};
+		for (i = 0; i < this.views.length; i++) {
+			if (this.views[i].id == x[type]) {
+				this.views[i].$el.remove();
+				this.views.splice(i, 1);
+				break;
+			}
+		}
+	}
+}
+
 ExplorerScenesView.prototype.setData = function(d) {
 	this.views = [];
 	for (var id in d) {
-		var v;
-		if (this.type == 'scene') {
-			var listview = new ExplorerScenesView('entity');
-			listview.setData(d[id].entities);
+		var data = d[id];
+		if (this.type == 'scene')
+			data = d[id].entities;
 
-			v = new ExplorerScenesItemView({
-				id: id,
-				type: this.type,
-				listview: listview
-			});
-		}
-		else if (this.type == 'entity') {
-			var listview = new ExplorerScenesView('component');
-			listview.setData(d[id]);
-
-			v = new ExplorerScenesItemView({
-				id: id,
-				type: this.type,
-				listview: listview
-			});
-		}
-		else {
-			v = new ExplorerScenesItemView({
-				id: id,
-				type: this.type
-			});
-		}
-
-		this.views.push(v);
+		this.addItem(null, null, this.type, id, data);
 	}
-
-	this.render();
 }
 
 ExplorerScenesView.prototype.render = function() {

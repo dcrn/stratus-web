@@ -26,7 +26,15 @@ ExplorerScriptsItemView.prototype.action = function(e) {
 	var action = $(this).data('action');
 	var id = $(this).parent().data('id');
 	
-	Editor.editScript(id);
+	if (action == 'edit') {
+		Editor.editScript(id);
+	}
+	else if (action == 'duplicate') {
+		console.log('Not implemented');
+	}
+	else if (action == 'delete') {
+		Editor.deleteScript(id);
+	}
 }
 
 ExplorerScriptsItemView.prototype.render = function() {

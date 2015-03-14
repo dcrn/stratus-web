@@ -6,6 +6,8 @@ ExplorerScriptsView = function() {
 
 ExplorerScriptsView.prototype.setData = function(d) {
 	this.data = d;
+	this.views = [];
+	
 	for (var file in this.data) {
 		this.views.push(
 			new ExplorerScriptsItemView({

@@ -103,7 +103,7 @@ def editor(repo):
 	else:
 		return error(403, 'Forbidden')
 
-@app.route('/editor/<repo>/<path:file>', methods=['GET', 'POST'])
+@app.route('/editor/<repo>/<path:file>', methods=['GET', 'POST', 'DELETE'])
 def file(repo, file):
 	if ('access_token' not in session):
 		return error(403, 'Forbidden')
@@ -114,7 +114,7 @@ def file(repo, file):
 
 	if request.method == 'GET':
 		data = g.storage.get_file(user, repo, file)
-		if data:
+		if data is not False:
 			return data, 200
 		return error(404, 'Not Found')
 	if request.method == 'POST':

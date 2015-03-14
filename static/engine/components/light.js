@@ -14,6 +14,13 @@ LightComponent = function(options) {
 	this.applyOptions(options);
 }
 
+LightComponent.prototype.onComponentRemove = function(ent, com) {
+	if (com === this) {
+		this.setIntensity(0.0);
+		this.setShadowDarkness(0.0);
+	}
+}
+
 LightComponent.prototype.applyOptions = function(options) {
 	this.setTarget(options.target);
 	this.targetEntID = options.target;
@@ -45,7 +52,7 @@ LightComponent.prototype.setTarget = function (eid) {
 }
 
 LightComponent.prototype.update = function (dt) {
-	if (!this.target && this.targetEntID) {
+	if (this.targetEntID) {
 		this.setTarget(this.targetEntID);
 		delete this.targetEntID;
 	}

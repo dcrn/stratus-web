@@ -13,14 +13,14 @@ ExplorerView = function() {
 		title: 'Scenes',
 		button: 'plus',
 		tooltip: 'New Scene',
-		callback: function(v, item, panel) {console.log("Not implemented");}
+		callback: function(v, item, panel) {Editor.newScene();}
 	});
 
 	this.tabs.add(this.scripts, {
 		title: 'Scripts',
 		button: 'plus',
 		tooltip: 'New Script',
-		callback: function(v, item, panel) {console.log("Not implemented");}
+		callback: function(v, item, panel) {Editor.newScript();}
 	});
 }
 

@@ -54,7 +54,7 @@ class Storage:
 
 	def set_file(self, user, repo, path, data):
 		if self.get_file(user, repo, path) == False:
-			if not this.create_file(user, repo, path):
+			if not self.create_file(user, repo, path):
 				return False
 
 		stat, re = self.call('/' + user + '/' + repo + '/file/' + path, 
