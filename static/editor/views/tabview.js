@@ -34,16 +34,22 @@ TabView.prototype.add = function(view, options) {
 		id: id
 	});
 
-	var self = this;
-	item.addCallback(function (e) {
-		options.callback(self, item, panel);
-	});
+	if (options.callback) {
+		var self = this;
+		item.addCallback(function (e) {
+			options.callback(self, item, panel);
+		});
+	}
 
 	this.items.push(item);
 	this.panels.push(panel);
+	this.$el.find('.nav.nav-tabs').append(item.render());
+	this.$el.find('.tab-content').append(panel.render());
 }
 
 TabView.prototype.remove = function(item, panel) {
+	item.$el.remove();
+	panel.$el.remove();
 	this.items.splice(this.items.indexOf(item));
 	this.panels.splice(this.panels.indexOf(panel));
 }

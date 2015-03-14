@@ -61,6 +61,7 @@ SceneView.prototype.updateProperty = function(sid, entid, comid, options) {
 	if (!ent || !ent.has(comid)) return;
 
 	Components.applyOptions(comid, ent.get(comid), options);
+	ent.update(0);
 }
 
 SceneView.prototype.updateCamera = function() {

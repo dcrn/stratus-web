@@ -138,7 +138,7 @@ def game(user, repo):
 				return error(404, 'Not Found')
 
 			return render_template(
-				'game.html', 
+				'game/game.html', 
 				gamedata=gamedata, 
 				components=components
 			)

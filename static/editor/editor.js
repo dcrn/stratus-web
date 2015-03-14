@@ -32,6 +32,10 @@ Editor.init = function(gamedata, repodata) {
 
 	// Re-render scene to fix camera
 	this.view.main.scene.render();
+
+	// Start autosaving
+	window.addEventListener('blur', this.autoSave.bind(this));
+	setInterval(this.autoSave.bind(this), 6000);
 }
 
 Editor.selectScene = function(s) {
@@ -73,6 +77,29 @@ Editor.changeProperty = function(comid, prop, val) {
 	}
 }
 
+Editor.autoSave = function() {
+	$.ajax({
+		type:'POST', 
+		data: JSON.stringify(this.gamedata), 
+		url: window.location.pathname + 
+			'/gamedata.json'
+	});
+}
+
+Editor.saveScript = function(filename) {
+	if (!this.scriptviews[filename]) {
+		return;
+	}
+
+	$.ajax({
+		type:'POST', 
+		data: this.scriptviews[filename].getData(), 
+		url: window.location.pathname + 
+			'/components/' + 
+			filename
+	});
+}
+
 Editor.editScript = function(filename) {
 	if (this.scriptviews[filename]) {
 		return;
@@ -84,8 +111,8 @@ Editor.editScript = function(filename) {
 		title: filename, 
 		button: 'remove', 
 		callback: function(v, item, panel) {
+			self.scriptviews[filename].autoSave();
 			v.remove(item, panel);
-			v.render();
 			v.showTab(0);
 			delete self.scriptviews[filename];
 		}

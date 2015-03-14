@@ -17,7 +17,6 @@ MainView = function() {
 
 MainView.prototype.add = function(v, options) {
 	this.tabs.add(v, options);
-	this.render();
 }
 
 MainView.prototype.render = function() {
