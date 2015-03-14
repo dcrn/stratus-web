@@ -1,0 +1,28 @@
+{% raw %}
+<div class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">{{title}}</h4>
+			</div>
+			<div class="modal-body">
+				{{#each inputs}}
+				<div class="form-group" data-property="{{@key}}">
+					<label>{{@key}}</label>
+					{{#isEq type "text"}}
+					<input type="text" class="form-control" value="{{value}}">
+					{{/isEq}}
+					{{#isEq type "bool"}}
+					<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
+					{{/isEq}}
+				</div>
+				{{/each}}
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default cancel">Cancel</button>
+				<button type="button" class="btn btn-primary okay">Okay</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endraw %}

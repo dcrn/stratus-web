@@ -1,0 +1,30 @@
+{% raw %}
+<li class="exp_scene" data-type="{{type}}" data-id="{{id}}">
+	{{#eq type 'component'}}
+	{{else}}
+	<button type="button" class="btn btn-link btn-xs toggle"><span class="glyphicon glyphicon-folder-open"></span></button>
+	{{/eq}}
+	{{#eq type 'scene'}}
+	<span class="glyphicon glyphicon-picture"></span>
+	{{/eq}}
+	{{#eq type 'entity'}}
+	<span class="glyphicon glyphicon-tree-deciduous"></span>
+	{{/eq}}
+	{{#eq type 'component'}}
+	<span class="glyphicon glyphicon-file"></span>
+	{{/eq}}
+	{{id}}
+	<button type="button" class="btn btn-link btn-xs" data-action="delete" data-toggle="tooltip" data-placement="bottom" title="Delete">
+		<span class="glyphicon glyphicon-trash"></span>
+	</button>
+	{{#eq type 'component'}}
+	{{else}}
+	<button type="button" class="btn btn-link btn-xs" data-action="duplicate" data-toggle="tooltip" data-placement="bottom" title="Duplicate">
+		<span class="glyphicon glyphicon-duplicate"></span>
+	</button>
+	<button type="button" class="btn btn-link btn-xs" data-action="add" data-toggle="tooltip" data-placement="bottom" title="Add {{#eq type 'scene'}}Entity{{else}}Component{{/eq}}">
+		<span class="glyphicon glyphicon-plus"></span>
+	</button>
+	{{/eq}}
+</li>
+{% endraw %}

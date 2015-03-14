@@ -1,13 +1,13 @@
 from flask import Flask, request, redirect, url_for, jsonify, render_template, session, g
 from github import GitHub
 from storage import Storage
-import time, json
+import time, json, jinja2
 
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
 
 def error(code, msg):
-	return (render_template('error.html', error={'code': code, 'message': msg}), code)
+	return (render_template('web/error.html', error={'code': code, 'message': msg}), code)
 
 # Catch all requests
 @app.after_request
@@ -44,7 +44,7 @@ def before_req():
 
 @app.route('/')
 def index():
-	return render_template('index.html')
+	return render_template('web/index.html')
   
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -78,7 +78,7 @@ def logout():
 @app.route('/projects')
 def projects():
 	if 'access_token' in session:
-		return render_template('projects.html')
+		return render_template('web/projects.html')
 	else:
 		return error(403, 'Forbidden')
 
@@ -93,7 +93,7 @@ def editor(repo):
 				return error(404, 'Not Found')
 
 			return render_template(
-				'editor.html', 
+				'editor/editor.html', 
 				gamedata=gamedata, 
 				components=components,
 				tree=json.dumps(tree)

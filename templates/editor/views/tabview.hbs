@@ -1,0 +1,12 @@
+{% raw %}
+<div class="tablist">
+	<ul class="nav nav-tabs" role="tablist">
+	</ul>
+	{{#if button}}
+	<button type="button" class="btn btn-link btn-xs"{{#if tooltip}} data-toggle="tooltip" data-placement="bottom" title="{{tooltip}}"{{/if}}><span class="glyphicon glyphicon-{{button}}"></span></button>
+	{{/if}}
+</div>
+
+<div class="tab-content">
+</div>
+{% endraw %}

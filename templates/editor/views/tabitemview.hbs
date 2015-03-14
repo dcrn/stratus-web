@@ -1,0 +1,12 @@
+{% raw %}
+<li class="tabitem{{#if active}} active{{/if}}">
+	<a data-target="#{{target}}" aria-controls="{{target}}" data-toggle="tab">
+		{{title}}
+		{{#if button}}
+		<button type="button" class="btn btn-link btn-xs"{{#if tooltip}} data-toggle="tooltip" data-placement="bottom" title="{{tooltip}}"{{/if}}>
+			<span class="glyphicon glyphicon-{{button}}"></span>
+		</button>
+		{{/if}}
+	</a>
+</li>
+{% endraw %}

@@ -1,0 +1,222 @@
+/** Global **/
+body, html {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	line-height: 0px;
+}
+
+/* Tabs */
+li.tabitem { 
+	cursor: pointer;
+	height: 26px !important; 
+	line-height: 26px !important; 
+}
+
+li.tabitem > a {
+	height: 26px !important; 
+	line-height: 26px !important; 
+	padding: 6px !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+li.tabitem > a > button {
+	display: none !important;
+}
+
+li.tabitem.active > a > button {
+	display: inline-block !important;
+}
+
+.tablist > button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin-top: 2px;
+	margin-right: 2px;
+}
+
+/* Inputs */
+input.form-control[type="checkbox"] {
+	float: right;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+}
+
+input.form-control[type="range"] {
+	height: 16px;
+	padding: 0;
+}
+
+input.form-control[type="text"] {
+	height: 24px;
+	padding: 4px;
+}
+
+select.form-control {
+	padding: 0px;
+	height: 24px;
+}
+
+/* Editor */
+#editor {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+/* Explorer */
+#explorer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 20%;
+	bottom: 0;
+	border-right: 1px solid lightgray;
+	overflow: auto;
+}
+
+ul.expl {
+	text-indent: 0px;
+	padding-left: 0px;
+}
+
+ul.expl ul.expl {
+	text-indent: 16px;
+}
+
+ul.expl ul.expl ul.expl {
+	text-indent: 49px;
+}
+
+ul.expl li {
+	cursor: pointer;
+	display: block;
+	border-top: 1px solid #eee;
+	min-height: 23px;
+	line-height: 23px;
+	color: #222;
+	background-color: #fff;
+}
+
+ul.expl li button {
+	display: none;
+	float: right;
+}
+
+ul.expl li button.toggle {
+	display: inline-block !important;
+	float: none !important;
+}
+
+ul.expl li button.toggle span {
+	width: 16px;
+}
+
+ul.expl li span {
+	padding: 0;
+	height: 15px;
+	text-indent: 0;
+}
+
+ul.expl li.selected {
+	background-color: #46c !important;
+	color: white !important;
+}
+
+ul.expl li.selected > button {
+	display: inline-block !important;
+	color: #ccf;
+}
+
+ul.expl li.selected > button:hover {
+	color: #eef;
+}
+
+#scriptlist li {
+	padding-left: 6px !important;
+}
+
+/* Main */
+#main {
+	position: absolute;
+	left: 20%;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow: hidden;
+}
+
+/* Scene */
+#scene {
+	position: absolute;
+	width: 75%;
+	top: 26px;
+	left: 0;
+	bottom: 0;
+}
+
+#scene > canvas {
+	width: 100%;
+	height: 100%;
+}
+
+/* Script */
+.script {
+	width: 100%;
+	height: 100%;
+}
+
+.tab-pane {
+	height: 100%;
+}
+
+/* Properties */
+#properties {
+	position: absolute;
+	width: 25%;
+	top: 26px;
+	right: 0;
+	bottom: 0;
+
+	padding: 6px;
+	border-left: 1px solid lightgray;
+	overflow: auto;
+}
+
+.properties_component.well {
+	margin-top: 0px;
+	margin-bottom: 6px;
+	padding: 4px;
+}
+
+.properties_component label {
+	margin-bottom: 0;
+}
+
+.properties_component .form-group {
+	border-top: 1px solid #d8d8d8;
+	padding-top: 2px;
+	margin-bottom: 4px;
+}
+
+.properties_component h4 {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.properties_component h4 span {
+	padding: 4px;
+}
+
+.properties_header {
+	font-size: 14px;
+	font-weight: bold;
+	padding: 1px;
+	border-bottom: 1px solid #d8d8d8;
+	margin-bottom: 4px;
+}

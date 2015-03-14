@@ -1,0 +1,62 @@
+{% raw %}
+<div class="properties_header">Entity Properties</div>
+{{#if this}}
+	{{#each this}}
+	<div class="properties_component well" data-component="{{@key}}">
+		<h4><button type="button" class="btn btn-link btn-xs toggle"><span class="glyphicon glyphicon-folder-open"></span></button> {{@key}}</h4>
+		{{#each this}}
+			<div class="form-group" data-component="{{@../key}}" data-property="{{@key}}" data-type="{{#isArray type}}list{{else}}{{type}}{{/isArray}}">
+			<label>{{@key}}</label>
+			{{#isArray type}}
+				<select class="form-control">
+					{{#each type}}
+						{{#eq this ../value}}
+						<option value="{{this}}" selected>{{this}}</option>
+						{{else}}
+						<option value="{{this}}">{{this}}</option>
+						{{/eq}}
+					{{/each}}
+				</select>
+			{{else}}
+				{{#eq type "text"}}
+					<input type="text" class="form-control" value="{{value}}">
+				{{/eq}}
+				{{#eq type "bool"}}
+					<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
+				{{/eq}}
+				{{#eq type "number"}}
+					<br />
+					<input type="range" class="form-control" min="0" max="1000" step="0.01" value="{{value}}">
+				{{/eq}}
+				{{#eq type "scalar"}}
+					<br />
+					<input type="range" class="form-control" min="0" max="1" step="0.01" value="{{value}}">
+				{{/eq}}
+				{{#eq type "vector"}}
+					<br />
+					x: <input type="range" class="form-control" data-axis="x" min="-500" max="500" step="0.01" value="{{value.[0]}}">
+					y: <input type="range" class="form-control" data-axis="y" min="-500" max="500" step="0.01" value="{{value.[1]}}">
+					z: <input type="range" class="form-control" data-axis="z" min="-500" max="500" step="0.01" value="{{value.[2]}}">
+				{{/eq}}
+				{{#eq type "quaternion"}}
+					<br />
+					x: <input type="range" class="form-control" data-axis="x" min="-1" max="1" step="0.01" value="{{value.[0]}}">
+					y: <input type="range" class="form-control" data-axis="y" min="-1" max="1" step="0.01" value="{{value.[1]}}">
+					z: <input type="range" class="form-control" data-axis="z" min="-1" max="1" step="0.01" value="{{value.[2]}}">
+					w: <input type="range" class="form-control" data-axis="w" min="-1" max="1" step="0.01" value="{{value.[3]}}">
+				{{/eq}}
+				{{#eq type "colour"}}
+					<br />
+					r: <input type="range" class="form-control" data-axis="r" min="0" max="255" step="1" value="{{value.[0]}}">
+					g: <input type="range" class="form-control" data-axis="g" min="0" max="255" step="1" value="{{value.[1]}}">
+					b: <input type="range" class="form-control" data-axis="b" min="0" max="255" step="1" value="{{value.[2]}}">
+				{{/eq}}
+			{{/isArray}}
+			</div>
+		{{/each}}
+	</div>
+	{{/each}}
+{{else}}
+	<div class="text-center">No entity selected</div>
+{{/if}}
+{% endraw %}

@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+	<title>Editor</title>
+	<link href="{{url_for('static', filename='editor/editor.css')}}" rel="stylesheet">
+	<link href="{{url_for('static', filename='lib/css/bootstrap.min.css')}}" rel="stylesheet">
+</head>
+<body>
+	<script src="{{url_for('static', filename='lib/handlebars.min.js')}}"></script>
+	<script src="{{url_for('static', filename='lib/jquery.min.js')}}"></script>
+	<script src="{{url_for('static', filename='lib/bootstrap.min.js')}}"></script>
+	<script src="{{url_for('static', filename='lib/ace/ace.js')}}"></script>
+	<script src="{{url_for('static', filename='editor/editor.js')}}"></script>
+
+	{% include 'game/engine.html' %}
+	{% for com in components %}
+		<script>
+			{{com|safe}}
+		</script>
+	{% endfor %}
+	<script type="application/json" id="gamedata">
+		{{gamedata|safe}}
+	</script>
+	<script type="application/json" id="repotree">
+		{{tree|safe}}
+	</script>
+
+	{# Load all views + templates #}
+	{% set views = [
+			'containerview',
+			'editorview',
+			'explorerscenesitemview',
+			'explorerscenesview',
+			'explorerscriptsitemview',
+			'explorerscriptsview',
+			'explorerview',
+			'mainview',
+			'modalinputview',
+			'propertiesview',
+			'sceneview',
+			'scriptview',
+			'tabitemview',
+			'tabpanelview',
+			'tabview'
+	] %}
+	{% set templates = [
+			'explorerscenesitemview',
+			'explorerscriptsitemview',
+			'modalinputview',
+			'propertiesview',
+			'tabitemview',
+			'tabpanelview',
+			'tabview'
+	] %}
+	{% for v in views %}
+	<script src="{{url_for('static', filename='editor/views/'+v+'.js')}}"></script>
+	{% endfor %}
+	{% for t in templates %}
+	<script id="template_{{t}}" type="text/html">
+		{% include 'editor/views/' + t + '.hbs' %}
+	</script>
+	{% endfor %}
+	
+	<script>
+		var gamejson, treejson;
+		try {
+			gamejson = JSON.parse(
+				document.getElementById("gamedata").innerHTML
+				);
+			treejson = JSON.parse(
+				document.getElementById("repotree").innerHTML
+				);
+		}
+		catch (e) {
+			console.log(e);
+			console.log('Game data is corrupt');
+		}
+
+		Editor.init(gamejson, treejson);
+	</script>
+</body>
