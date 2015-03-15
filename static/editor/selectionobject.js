@@ -54,10 +54,13 @@ SelectionObject.prototype.getMesh = function() {
 }
 
 SelectionObject.prototype.setEntity = function(e) {
-	if (!e || !e.has('transform'))
+	if (!e || !e.has('transform')) {
 		this.entity = null;
-	else
+		this.mesh.visible = false;
+	}
+	else {
 		this.entity = e;
+	}
 }
 
 SelectionObject.prototype.onMouseDown = function(x, y) {

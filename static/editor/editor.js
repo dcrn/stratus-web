@@ -173,6 +173,10 @@ Editor.newScene = function() {
 		title: 'New Scene',
 		inputs: {ID: {type: 'text', value: ''}},
 		callback: function(val) {
+			if (!val.ID) return;
+			val.ID = val.ID.trim();
+			if (val.ID === '') return;
+
 			self.gamedata.scenes[val.ID] = {entities:{}};
 			self.view.main.scene.addScene(val.ID);
 			self.view.explorer.scenes.addItem(null, null, 'scene', val.ID, {});
@@ -193,6 +197,10 @@ Editor.performAction = function(type, action) {
 				title: 'New Entity',
 				inputs: {ID: {type: 'text', value: ''}},
 				callback: function(val) {
+					if (!val.ID) return;
+					val.ID = val.ID.trim();
+					if (val.ID === '') return;
+
 					sc.entities[val.ID] = {transform:{}};
 					self.view.explorer.scenes.addItem(
 						self.selection.scene, 
@@ -235,6 +243,10 @@ Editor.performAction = function(type, action) {
 				title: 'Add Component',
 				inputs: {Component: {type: 'text', value: ''}},
 				callback: function(val) {
+					if (!val.Component) return;
+					val.Component = val.Component.trim();
+					if (val.Component === '') return;
+
 					ent[val.Component] = {};
 					self.view.explorer.scenes.addItem(
 						self.selection.scene, 

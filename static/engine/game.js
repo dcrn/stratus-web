@@ -254,3 +254,11 @@ Game.setPointerLockEnabled = function() {
 		this.pointerlock = false;
 	}
 }
+
+Game.properties = {
+	shadowMapEnabled: {type: 'bool', default: true},
+	shadowMapType: {type: ['PCFSoftShadowMap', 'PCFShadowMap', 'BasicShadowMap'], default: 'PCFShadowMap'},
+	clearColour: {type: 'colour', default: 0x000000},
+	pointerLockEnabled: {type: 'bool', default: false},
+	defaultSceneID: {type: 'text', default: ''}
+}
