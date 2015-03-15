@@ -130,6 +130,9 @@ SceneView.prototype.setData = function(d) {
 	if (d.config && d.config.defaultSceneID) {
 		this.game[d.config.defaultSceneID].activate();
 	}
+	if (d.config && d.config.clearColour) {
+		this.renderer.setClearColor(d.config.clearColour);
+	}
 }
 
 SceneView.prototype.setActiveScene = function(sid) {
@@ -142,6 +145,9 @@ SceneView.prototype.setActiveScene = function(sid) {
 	if (sc) {
 		sc.activate();
 		sc.threeobj.add(this.selection.getMesh());
+		for (var i in sc.entities) {
+			sc.entities[i].update(0);
+		}
 	}
 
 	this.setSelection(null);
@@ -203,6 +209,12 @@ SceneView.prototype.removeComponent = function(sid, entid, comid) {
 	var com = this.game[sid].entities[entid].get(comid);
 	if (com)
 		this.game[sid].entities[entid].remove(com);
+}
+
+SceneView.prototype.updateSettings = function(settings) {
+	if (settings.clearColour) {
+		this.renderer.setClearColor(settings.clearColour);
+	}
 }
 
 SceneView.prototype.updateProperty = function(sid, entid, comid, options) {

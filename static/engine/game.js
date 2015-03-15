@@ -237,10 +237,15 @@ Game.setClearColour = function(val) {
 }
 
 Game.getPointerLockEnabled = function() {
-	return this.pointerlock != false;
+	return this.pointerlock !== false;
 }
 
-Game.setPointerLockEnabled = function() {
+Game.setPointerLockEnabled = function(b) {
+	if (!b) {
+		this.pointerlock = false;
+		return;
+	}
+
 	var can = this.renderer.domElement;
 	var pl = can.requestPointerLock ||
 			can.mozRequestPointerLock ||

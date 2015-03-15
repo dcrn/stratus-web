@@ -6,7 +6,7 @@ ExplorerView = function() {
 	this.tabs = new TabView({
 		button: 'cog', 
 		tooltip: 'Settings',
-		callback: function() {console.log("Not implemented")}
+		callback: function() {Editor.openSettings();}
 	});
 
 	this.tabs.add(this.scenes, {

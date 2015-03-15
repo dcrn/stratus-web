@@ -187,6 +187,15 @@ Editor.newScene = function() {
 	});
 }
 
+Editor.openSettings = function() {
+	var self = this;
+	this.view.showSettingsModal(this.gamedata.config, function(r) {
+		self.gamedata.config = r;
+		self.view.main.scene.updateSettings(r);
+		self.modified();
+	});
+}
+
 Editor.performAction = function(type, action) {
 	var self = this;
 
