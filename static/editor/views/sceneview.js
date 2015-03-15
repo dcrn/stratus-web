@@ -1,4 +1,5 @@
 SceneView = function() {
+	var self = this;
 	this.$el = $('<div>', {id:'scene'});
 
 	// Create renderer
@@ -10,35 +11,137 @@ SceneView = function() {
 	this.camera.position.set(0, -100, 40);
 	this.camera.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2.5);
 
-	this.selectionMesh = new THREE.Mesh(
-		new THREE.BoxGeometry(1, 1, 1),
-		new THREE.MeshBasicMaterial({wireframe: true})
-	);
+	this.viewyaw = 0.0;
+	this.viewpitch = Math.PI/2.5;
+	this.yaw = new Quaternion();
+	this.pitch = new Quaternion();
 
-	this.selection = null;
+	this.vec_forward = new Vector3(0, 0, -1);
+	this.vec_right = new Vector3(1, 0, 0);
+	this.vec_up = new Vector3(0, 0, 1);
+	this.move_forward = 0;
+	this.move_right = 0;
+	this.move_up = 0;
 
-	var self = this;
-	window.addEventListener('resize', function(e) {
-		self.updateCamera();
-	});
+	// Set up selection indicator
+	this.selection = new SelectionObject(this.renderer, this.camera);
 
+	// Start listening for events
+	window.addEventListener('resize', this.updateCamera.bind(this));
+	this.renderer.domElement.onmousemove = this.onMouseMove.bind(this);
+	this.renderer.domElement.onmousedown = this.onMouseDown.bind(this);
+	this.renderer.domElement.onmouseup = this.onMouseUp.bind(this);
+	window.addEventListener('mouseup', this.onMouseUp.bind(this));
+	window.addEventListener('keyup', this.onKeyUp.bind(this));
+	window.addEventListener('keydown', this.onKeyDown.bind(this));
+
+	// Start drawing & updating
 	requestAnimationFrame(this.update.bind(this));
+}
+
+SceneView.prototype.onKeyUp = function(e) {
+	ch = String.fromCharCode(e.keyCode);
+	if (ch == 'W' || ch == 'S')
+		this.move_forward = 0;
+	else if (ch == 'D' || ch == 'A')
+		this.move_right = 0;
+	else if (ch == ' ' || e.keyCode == 16)
+		this.move_up = 0;
+}
+
+SceneView.prototype.onKeyDown = function(e) {
+	if (e.repeat) return;
+
+	ch = String.fromCharCode(e.keyCode);
+	if (ch == 'W')
+		this.move_forward = 1;
+	else if (ch == 'S')
+		this.move_forward = -1;
+	else if (ch == 'D')
+		this.move_right = 1;
+	else if (ch == 'A')
+		this.move_right = -1;
+	else if (ch == ' ')
+		this.move_up = 1;
+	else if (e.keyCode == 16)
+		this.move_up = -1;
+}
+
+SceneView.prototype.updateMovement = function() {
+	if (!this.looking) return false;
+	
+	if (this.move_forward != 0) {
+		this.camera.position.add(
+			this.vec_forward.clone().
+				applyQuaternion(this.camera.quaternion).
+				multiplyScalar(this.move_forward)
+		);
+	}
+	
+	if (this.move_right != 0) {
+		this.camera.position.add(
+			this.vec_right.clone().
+				applyQuaternion(this.camera.quaternion).
+				multiplyScalar(this.move_right)
+		);
+	}
+	
+	if (this.move_up != 0) {
+		this.camera.position.add(
+			this.vec_up.clone().
+				multiplyScalar(this.move_up)
+		);
+	}
+}
+
+SceneView.prototype.onMouseDown = function(e) {
+	var handled = this.selection.onMouseDown(e.offsetX, e.offsetY);
+	if (handled) return;
+
+	this.looking = new THREE.Vector2(e.offsetX, e.offsetY);
+}
+
+SceneView.prototype.onMouseUp = function(e) {
+	this.selection.onMouseUp();
+	this.looking = false;
+}
+
+SceneView.prototype.onMouseMove = function(e) {
+	this.selection.onMouseMove(e.offsetX, e.offsetY);
+	if (this.looking) {
+		var pos = new THREE.Vector2(e.offsetX, e.offsetY);
+		var delta = pos.clone();
+			delta.sub(this.looking);
+
+		this.viewyaw -= delta.x / 300;
+		this.viewpitch = Math.min(Math.PI, Math.max(this.viewpitch - delta.y / 300, 0));
+
+		this.yaw.setFromAxisAngle(new Vector3(0, 0, 1), this.viewyaw);
+		this.pitch.setFromAxisAngle(new Vector3(1, 0, 0), this.viewpitch);
+		this.camera.quaternion.copy(this.yaw);
+		this.camera.quaternion.multiply(this.pitch);
+
+		this.looking = pos;
+	}
 }
 
 SceneView.prototype.setData = function(d) {
 	this.game = Game.load(d);
+	if (d.config && d.config.defaultSceneID) {
+		this.game[d.config.defaultSceneID].activate();
+	}
 }
 
 SceneView.prototype.setActiveScene = function(sid) {
 	var old = Game.getActiveScene();
 	if (old) {
-		old.threeobj.remove(this.selectionMesh);
+		old.threeobj.remove(this.selection.getMesh());
 	}
 
 	var sc = this.game[sid];
 	if (sc) {
 		sc.activate();
-		sc.threeobj.add(this.selectionMesh);
+		sc.threeobj.add(this.selection.getMesh());
 	}
 
 	this.setSelection(null);
@@ -49,13 +152,12 @@ SceneView.prototype.setSelection = function(eid) {
 	if (eid && sc) {
 		var ent = sc.entities[eid];
 		if (ent) {
-			this.selection = ent;
-			this.selectionMesh.visible = true;
+			this.selection.setEntity(ent);
 			return;
 		}
 	}
 
-	this.selectionMesh.visible = false;
+	this.selection.setEntity(null);
 }
 
 SceneView.prototype.addScene = function(sid) {
@@ -137,31 +239,8 @@ SceneView.prototype.update = function() {
 	var sc = Game.getActiveScene();
 	if (!sc) return;
 
-	if (this.selection) {
-		if (this.selection.has('transform')) {
-			this.selectionMesh.visible = true;
-
-			var t = this.selection.get('transform');
-			this.selectionMesh.position.copy(
-				t.getPosition()
-			);
-			this.selectionMesh.quaternion.copy(
-				t.getRotation()
-			);
-			this.selectionMesh.scale.copy(
-				t.getScale()
-			);
-			this.selectionMesh.scale.add(
-				new Vector3(1, 1, 1)
-			);
-		}
-		else {
-			this.selectionMesh.visible = false;
-			this.selectionMesh.position.set(0, 0, 0);
-			this.selectionMesh.quaternion.set(0, 0, 0, 1);
-			this.selectionMesh.scale.set(1, 1, 1);
-		}
-	}
+	this.selection.update();
+	this.updateMovement();
 
 	for (var entid in sc.entities) {
 		var ent = sc.entities[entid];

@@ -82,7 +82,7 @@ FlyControllerComponent = function() {
 }
 
 FlyControllerComponent.prototype.update = function(dt) {
-	if (!this.entity.has('transform')) return;
+	if (dt === 0 || !this.entity.has('transform')) return;
 	
 	var transform = this.entity.get('transform');
 	transform.setRotation(this.look)

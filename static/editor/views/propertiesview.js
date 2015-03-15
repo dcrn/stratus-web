@@ -86,7 +86,7 @@ PropertiesView.prototype.oninput = function(e) {
 	}
 
 	if (val !== null) {
-		Editor.changeProperty(comid, prop, val);
+		Editor.onPropertyChanged(comid, prop, val);
 	}
 }
 

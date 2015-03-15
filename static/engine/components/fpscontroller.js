@@ -1,9 +1,9 @@
 FPSControllerComponent = function() {
 	var self = this;
-	this.look = new THREE.Quaternion();
+	this.look = new Quaternion();
 	this.look.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2);
-	this.yaw = new THREE.Quaternion(0, 1, 0, 0);
-	this.pitch = new THREE.Quaternion(1, 0, 0, 0);
+	this.yaw = new Quaternion(0, 1, 0, 0);
+	this.pitch = new Quaternion(1, 0, 0, 0);
 
 	this.axis_pitch = new Vector3(1, 0, 0);
 	this.axis_yaw = new Vector3(0, 0, 1);
@@ -14,31 +14,24 @@ FPSControllerComponent = function() {
 	this.move_right = 0;
 
 	this.sensitivity = -0.0035;
-	this.speed = 50;
+	this.speed = 150;
 
 	this.mouse_x = 0;
 	this.mouse_y = Math.PI/2;
 
-	this.physics = new PhysicsComponent({
+	this.physics = Components.create('physics', {
 		shape: 'cylinder',
-		mass: 20,
+		mass: 200,
 		angularDamping: 10000,
-		friction: 100,
+		friction: 0.9,
 		damping: 0.0
 	});
 
 	var size = {x: 2, y:16, z: 2};
 	this.physics.setScale(new Vector3(size.x, size.y, size.z));
 	this.physics.setPosition(new Vector3(0, -50, size.y));
-	this.physics.setRotation(new Quaternion(1, 0, 0, 1));
+	this.physics.setRotation(new Quaternion(0.707, 0, 0, 0.707));
 	this.ammoobj = this.physics.ammoobj;
-
-	this.mesh = new MeshComponent({
-		shape: 'cylinder',
-		materialColour: 0xFF00FF
-	});
-	this.threeobj = this.mesh.threeobj;
-	this.threeobj.scale.set(size.x, size.y, size.z);
 
 	var mouse_last = null;
 	var dx = 0, dy = 0;
@@ -94,7 +87,7 @@ FPSControllerComponent = function() {
 }
 
 FPSControllerComponent.prototype.update = function(dt) {
-	if (!this.entity.has('transform')) return;
+	if (dt === 0 || !this.entity.has('transform')) return;
 	var transform = this.entity.get('transform');
 
 	transform.setRotation(this.look);
@@ -104,15 +97,11 @@ FPSControllerComponent.prototype.update = function(dt) {
 		entpos.add(new Vector3(0, 0, 10));
 	transform.setPosition(entpos);
 
-	var pitch = new THREE.Quaternion();
+	var pitch = new Quaternion();
 	pitch.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2);
 	var yaw = this.yaw.clone();
 	yaw.multiply(pitch);
 	this.physics.setRotation(yaw);
-
-	this.threeobj.position.copy(physpos);
-	var physrot = this.physics.getRotation();
-	this.threeobj.quaternion.copy(physrot);
 
 	// Movement
 	var fwdDir = this.vec_forward.clone();

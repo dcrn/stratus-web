@@ -62,23 +62,6 @@ Editor.selectComponent = function(c) {
 	this.selection.component = c;
 }
 
-Editor.changeProperty = function(comid, prop, val) {
-	if (!this.selection.entity) return;
-	var sc = this.gamedata.scenes[this.selection.scene];
-	var ent = sc.entities[this.selection.entity];
-	if (sc && ent) {
-		ent[comid][prop] = val;
-
-		this.view.main.scene.updateProperty(
-			this.selection.scene,
-			this.selection.entity,
-			comid, ent[comid]
-		);
-	}
-
-	this.modified();
-}
-
 Editor.modified = function() {
 	if (this.savetimer) 
 		clearTimeout(this.savetimer);
@@ -313,4 +296,27 @@ Editor.performAction = function(type, action) {
 			});
 		}
 	}
+}
+
+Editor.onPropertyChanged = function(comid, prop, val, updateProperties) {
+	if (!this.selection.entity) return;
+	var sc = this.gamedata.scenes[this.selection.scene];
+	var ent = sc.entities[this.selection.entity];
+	if (sc && ent) {
+		ent[comid][prop] = val;
+
+		this.view.main.scene.updateProperty(
+			this.selection.scene,
+			this.selection.entity,
+			comid, ent[comid]
+		);
+
+		if (updateProperties) {
+			this.view.main.properties.setData(
+				this.gamedata.scenes[this.selection.scene].entities[this.selection.entity]
+			);
+		}
+	}
+
+	this.modified();
 }
