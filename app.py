@@ -105,14 +105,31 @@ def projects():
 	else:
 		return error(403, 'Forbidden')
 
-@app.route('/projects/commit/<repo>/<message>')
-def commit(repo, message):
+@app.route('/projects/commit/<repo>', methods=['POST'])
+def commit(repo):
 	if 'access_token' not in session:
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
+	msg = request.form.get('message')
 
-	return message
+	stat = g.storage.get_repo_status(user, repo)
+
+	# Make commit list from modified/removed/untracked files
+	commit = {'A': [], 'R': [], 'msg': msg}
+	commit['A'] += stat['U']
+	if 'M' in stat:
+		for f in stat['M']:
+			commit['A'].append(f['A'])
+	if 'D' in stat:
+		for f in stat['D']:
+			commit['R'].append(f['A'])
+	
+	status = g.storage.commit_repo(user, repo, commit)
+	if status is False:
+		return error(500, 'Internal Server Error')
+
+	return redirect(url_for('projects'))
 
 @app.route('/projects/init/<repo>')
 def init(repo):

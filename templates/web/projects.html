@@ -32,7 +32,7 @@
 				<span class="label label-default">All changes committed.</span>
 				{% endif %}
 				
-				<span class="label label-{% if repos[repo] > 0 %}primary{% else %}default{% endif%}">{{repos[repo]}} commit(s) ahead of remote</span>
+				<span class="label label-{% if repos[repo] > 0 %}primary{% else %}default{% endif%}">{{repos[repo]}} commit(s) ahead of GitHub</span>
 
 				<a href="/projects/pull/{{repo}}" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-save"></span> Pull</a>
 				<a href="/projects/push/{{repo}}" class="btn btn-xs btn-default{% if repos[repo] == 0 %} disabled{% endif %}"><span class="glyphicon glyphicon-open"></span> Push</a>
@@ -66,14 +66,16 @@
 			<div class="modal-header">
 				<h3>Commit Changes to Repository</h3>
 			</div>
-			<div class="modal-body">
-				<h4>Commit message:</h4>
-				<textarea class="form-control"></textarea>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default cancelbutton">Cancel</button>
-				<button type="button"  class="btn btn-primary okaybutton">Okay</button>
-			</div>
+			<form method="post" action="/projects/commit/">
+				<div class="modal-body">
+					<h4>Commit message:</h4>
+					<textarea name="message" class="form-control"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default cancelbutton">Cancel</button>
+					<button type="button" class="btn btn-primary okaybutton">Okay</button>
+				</div>
+			</form>
 		</div>
 	</div>
 
@@ -167,15 +169,19 @@
 
 		// Setup commit modal
 		$('.commitbutton').click(function() {
+			var repo = $(this).data('repo');
+
 			$('#commitmodal textarea').val('');
 			$('#commitmodal').modal('show');
-			$('#commitmodal button').unbind();
-			$('#commitmodal .okaybutton').click(function() {
-				msg = $('#commitmodal textarea').val('');
+			$('#commitmodal form').attr('action',
+				'/projects/commit/' + repo
+			);
+			$('#commitmodal .okaybutton').unbind();
+			$('#commitmodal .okaybutton').click(function(e) {
 				$('#commitmodal').modal('hide');
 
-				if (msg.trim() !== '') {
-					window.location.href = '/projects/commit/' + reponame + '/' + msg;
+				if ($('#commitmodal textarea').val().trim() !== '') {
+					$('#commitmodal form').submit();
 				}
 			});
 		});
