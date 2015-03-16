@@ -79,33 +79,33 @@ def logout():
 	session.clear()
 	return redirect(url_for('index'))
 
-@app.route('/projects')
-def projects():
-	if 'access_token' in session:
-		user = session['user_info']['login']
-		repos = g.storage.get_repo_list(user)
-		# Get status for each repo
-		status = {}
-		for r in repos:
-			stat = g.storage.get_repo_status(user, r)
-			
-			if (stat is False):
-				status[r] = False
-			else:
-				status[r] = True
-				for v in stat.values():
-					if len(v) is not 0:
-						break;
-				else:
-					status[r] = False
-
-		return render_template('web/projects.html', 
-			repos=repos,
-			status=status)
-	else:
+@app.route('/dashboard')
+def dashboard():
+	if 'access_token' not in session:
 		return error(403, 'Forbidden')
 
-@app.route('/projects/commit/<repo>', methods=['POST'])
+	user = session['user_info']['login']
+	repos = g.storage.get_repo_list(user)
+	# Get status for each repo
+	status = {}
+	for r in repos:
+		stat = g.storage.get_repo_status(user, r)
+		
+		if (stat is False):
+			status[r] = False
+		else:
+			status[r] = True
+			for v in stat.values():
+				if len(v) is not 0:
+					break;
+			else:
+				status[r] = False
+
+	return render_template('web/dashboard.html', 
+		repos=repos,
+		status=status)
+
+@app.route('/dashboard/commit/<repo>', methods=['POST'])
 def commit(repo):
 	if 'access_token' not in session:
 		return error(403, 'Forbidden')
@@ -127,11 +127,15 @@ def commit(repo):
 	
 	status = g.storage.commit_repo(user, repo, commit)
 	if status is False:
-		return error(500, 'Internal Server Error')
+		return redirect(url_for('dashboard', 
+			alert="Unable to commit changes", 
+			alert_type="danger"))
 
-	return redirect(url_for('projects'))
+	return redirect(url_for('dashboard', 
+		alert="Changes committed successfully", 
+		alert_type="success"))
 
-@app.route('/projects/init/<repo>')
+@app.route('/dashboard/init/<repo>')
 def init(repo):
 	if 'access_token' not in session:
 		return error(403, 'Forbidden')
@@ -142,11 +146,15 @@ def init(repo):
 	# Init on github and on storage
 	stat = g.github.init_repo(repo, access_token)
 	if stat is False: 
-		return error(500, 'Internal Server Error');
+		return redirect(url_for('dashboard', 
+			alert="Unable to create remote repository on GitHub", 
+			alert_type="danger"))
 
 	stat = g.storage.init_repo(user, repo, access_token)
 	if stat is False: 
-		return error(500, 'Internal Server Error');
+		return redirect(url_for('dashboard', 
+			alert="Unable to initialize local repository", 
+			alert_type="danger"))
 
 	# Update list of repos from github
 	status, repos = g.github.list_repos(session['access_token'])
@@ -156,9 +164,11 @@ def init(repo):
 	# init gamedata.json
 	g.storage.set_file(user, repo, 'gamedata.json', '{}')
 
-	return redirect(url_for('projects'))
+	return redirect(url_for('dashboard', 
+		alert="Repository initialized locally and remotely", 
+		alert_type="success"))
 
-@app.route('/projects/delete/<repo>')
+@app.route('/dashboard/delete/<repo>')
 def delete(repo):
 	if 'access_token' not in session:
 		return error(403, 'Forbidden')
@@ -167,11 +177,15 @@ def delete(repo):
 	stat = g.storage.delete_repo(user, repo)
 
 	if stat is False:
-		return error(500, 'Internal Server Error')
+		return redirect(url_for('dashboard', 
+			alert="Unable to delete repository locally", 
+			alert_type="danger"))
 
-	return redirect(url_for('projects'))
+	return redirect(url_for('dashboard', 
+		alert="Delete completed successfully", 
+		alert_type="success"))
 
-@app.route('/projects/clone/<repo>')
+@app.route('/dashboard/clone/<repo>')
 def clone(repo):
 	if 'access_token' not in session:
 		return error(403, 'Forbidden')
@@ -181,11 +195,49 @@ def clone(repo):
 
 	stat = g.storage.init_repo(user, repo, access_token)
 	if stat is False: 
-		return error(500, 'Internal Server Error');
+		redirect(url_for('dashboard', 
+			alert="Unable to init repository", 
+			alert_type="danger"))
 
 	stat = g.storage.pull_repo(user, repo)
+	if stat is False:
+		redirect(url_for('dashboard', 
+			alert="Unable to pull repository", 
+			alert_type="danger"))
 
-	return redirect(url_for('projects'))
+	return redirect(url_for('dashboard', 
+		alert="Clone completed successfully", 
+		alert_type="success"))
+
+@app.route('/dashboard/push/<repo>')
+def push(repo):
+	if 'access_token' not in session:
+		return error(403, 'Forbidden')
+
+	user = session['user_info']['login']
+	if not g.storage.push_repo(user, repo):
+		return redirect(url_for('dashboard', 
+			alert="Unable to push to remote", 
+			alert_type="danger"))
+
+	return redirect(url_for('dashboard', 
+		alert="Push completed successfully", 
+		alert_type="success"))
+
+@app.route('/dashboard/pull/<repo>')
+def pull(repo):
+	if 'access_token' not in session:
+		return error(403, 'Forbidden')
+
+	user = session['user_info']['login']
+	if not g.storage.pull_repo(user, repo):
+		return redirect(url_for('dashboard', 
+			alert="Unable to pull to remote", 
+			alert_type="danger"))
+
+	return redirect(url_for('dashboard', 
+		alert="Pull completed successfully", 
+		alert_type="success"))
 
 @app.route('/editor/<repo>')
 def editor(repo):

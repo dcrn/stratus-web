@@ -14,7 +14,7 @@
  				<ul class="nav navbar-nav">
 					<li{% if page == 'index' %} class="active"{% endif %}><a href="{{url_for('index')}}">Home</a></li>
 					{% if 'access_token' in session %}
- 						<li{% if page == 'projects' %} class="active"{% endif %}><a href="{{url_for('projects')}}">Projects</a></li>
+ 						<li{% if page == 'dashboard' %} class="active"{% endif %}><a href="{{url_for('dashboard')}}">Dashboard</a></li>
 					{% endif %}
  				</ul>
  			</div>

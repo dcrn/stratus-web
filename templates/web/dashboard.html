@@ -1,8 +1,20 @@
-{% set page='projects' %}
+{% set page='dashboard' %}
 {% extends 'web/base.html' %}
 {% block content %}
+	<div class="notifications">
+		{% if request.args.alert %}
+			<div class="alert alert-{{request.args.alert_type}}">
+				{% if request.args.alert_type == 'danger' %}
+				<span class="glyphicon glyphicon-remove"></span>
+				{% elif request.args.alert_type == 'success' %}
+				<span class="glyphicon glyphicon-ok"></span>
+				{% endif %}
+				{{request.args.alert}}
+			</div>
+		{% endif %}
+	</div>
 	<div class="page-header">
-		<h1 class="inline">Your Projects</h1>
+		<h1 class="inline">Dashboard - Your projects</h1>
 		<a class="btn btn-sm btn-primary" id="clonerepo">
 			<span class="glyphicon glyphicon-duplicate"></span>
 			Clone From GitHub
@@ -32,10 +44,10 @@
 				<span class="label label-default">All changes committed.</span>
 				{% endif %}
 				
-				<span class="label label-{% if repos[repo] > 0 %}primary{% else %}default{% endif%}">{{repos[repo]}} commit(s) ahead of GitHub</span>
+				<span class="label label-{% if repos[repo] > 0 %}primary{% else %}default{% endif%}">{{repos[repo]}} commit{% if repos[repo] != 1 %}s{% endif %} ahead of GitHub</span>
 
-				<a href="/projects/pull/{{repo}}" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-save"></span> Pull</a>
-				<a href="/projects/push/{{repo}}" class="btn btn-xs btn-default{% if repos[repo] == 0 %} disabled{% endif %}"><span class="glyphicon glyphicon-open"></span> Push</a>
+				<a href="/dashboard/pull/{{repo}}" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-save"></span> Pull</a>
+				<a href="/dashboard/push/{{repo}}" class="btn btn-xs btn-default{% if repos[repo] == 0 %} disabled{% endif %}"><span class="glyphicon glyphicon-open"></span> Push</a>
 				<button data-repo="{{repo}}" class="btn btn-xs btn-default commitbutton"{% if not status[repo] %} disabled{% endif %}><span class="glyphicon glyphicon-saved"></span> Commit</button>
 			</div>
 		</div>
@@ -66,7 +78,7 @@
 			<div class="modal-header">
 				<h3>Commit Changes to Repository</h3>
 			</div>
-			<form method="post" action="/projects/commit/">
+			<form method="post" action="/dashboard/commit/">
 				<div class="modal-body">
 					<h4>Commit message:</h4>
 					<textarea name="message" class="form-control"></textarea>
@@ -104,7 +116,7 @@
 					{% if repo not in repos %}
 					<li class="list-group-item">
 						<a href="https://github.com/{{session['user_info']['login']}}/{{repo}}">{{repo}}</a>
-						<a href="/projects/clone/{{repo}}" class="btn btn-primary btn-sm">Clone</a></li>
+						<a href="/dashboard/clone/{{repo}}" class="btn btn-primary btn-sm">Clone</a></li>
 					{% endif %}
 				{% endfor %}
 				</ul>
@@ -136,7 +148,7 @@
 			var name = $('#initmodal input').val().trim();
 			$('#initmodal').modal('hide');
 			if (name !== ''){
-				window.location.href = '/projects/init/' + name;
+				window.location.href = '/dashboard/init/' + name;
 			}
 		});
 		$('#initmodal input').on('input', function() {
@@ -163,7 +175,7 @@
 			$('#deletemodal .okaybutton').unbind();
 			$('#deletemodal .okaybutton').click(function() {
 				$('#deletemodal').modal('hide');
-				window.location.href = '/projects/delete/' + reponame;
+				window.location.href = '/dashboard/delete/' + reponame;
 			});
 		});
 
@@ -174,7 +186,7 @@
 			$('#commitmodal textarea').val('');
 			$('#commitmodal').modal('show');
 			$('#commitmodal form').attr('action',
-				'/projects/commit/' + repo
+				'/dashboard/commit/' + repo
 			);
 			$('#commitmodal .okaybutton').unbind();
 			$('#commitmodal .okaybutton').click(function(e) {
