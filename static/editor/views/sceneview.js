@@ -98,6 +98,9 @@ SceneView.prototype.onMouseDown = function(e) {
 	var handled = this.selection.onMouseDown(e.offsetX, e.offsetY);
 	if (handled) return;
 
+	this.move_forward = 0;
+	this.move_right = 0;
+	this.move_up = 0;
 	this.looking = new THREE.Vector2(e.offsetX, e.offsetY);
 }
 

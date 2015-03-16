@@ -81,7 +81,7 @@ Editor.onBlur = function() {
 Editor.autoSave = function() {
 	$.ajax({
 		type:'POST', 
-		data: JSON.stringify(this.gamedata), 
+		data: JSON.stringify(this.gamedata, null, '\t') + '\n', 
 		url: window.location.pathname + 
 			'/gamedata.json'
 	});
