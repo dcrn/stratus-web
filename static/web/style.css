@@ -52,15 +52,15 @@ body {
 	width: 95%;
 }
 
-.project {
-	height: 48px;
-}
-
 .project h1 {
+	display: inline;
 	margin: 0;
-	float: left;
 	font-size: 1.4em;
 	line-height: 1.4em;
+}
+
+.project .panel-body {
+	padding: 4px !important;
 }
 
 .project .btn {
@@ -76,4 +76,10 @@ body {
 	padding-left: 20px !important;
 	padding-right: 20px !important;
 	margin-top: -5px;
+}
+
+.label-default {
+	background-color: #fff;
+	border: 1px solid gray;
+	color: gray;
 }

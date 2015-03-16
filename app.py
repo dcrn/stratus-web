@@ -82,10 +82,37 @@ def logout():
 @app.route('/projects')
 def projects():
 	if 'access_token' in session:
-		repos = g.storage.list_repos(session['user_info']['login'])
-		return render_template('web/projects.html', repos=repos)
+		user = session['user_info']['login']
+		repos = g.storage.get_repo_list(user)
+		# Get status for each repo
+		status = {}
+		for r in repos:
+			stat = g.storage.get_repo_status(user, r)
+			
+			if (stat is False):
+				status[r] = False
+			else:
+				status[r] = True
+				for v in stat.values():
+					if len(v) is not 0:
+						break;
+				else:
+					status[r] = False
+
+		return render_template('web/projects.html', 
+			repos=repos,
+			status=status)
 	else:
 		return error(403, 'Forbidden')
+
+@app.route('/projects/commit/<repo>/<message>')
+def commit(repo, message):
+	if 'access_token' not in session:
+		return error(403, 'Forbidden')
+
+	user = session['user_info']['login']
+
+	return message
 
 @app.route('/projects/init/<repo>')
 def init(repo):
@@ -104,6 +131,11 @@ def init(repo):
 	if stat is False: 
 		return error(500, 'Internal Server Error');
 
+	# Update list of repos from github
+	status, repos = g.github.list_repos(session['access_token'])
+	if status:
+		session['user_repos'] = [x['name'] for x in repos]
+
 	# init gamedata.json
 	g.storage.set_file(user, repo, 'gamedata.json', '{}')
 
@@ -115,7 +147,10 @@ def delete(repo):
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
-	g.storage.delete_repo(user, repo)
+	stat = g.storage.delete_repo(user, repo)
+
+	if stat is False:
+		return error(500, 'Internal Server Error')
 
 	return redirect(url_for('projects'))
 
@@ -132,8 +167,6 @@ def clone(repo):
 		return error(500, 'Internal Server Error');
 
 	stat = g.storage.pull_repo(user, repo)
-	if stat is False: 
-		return error(500, 'Internal Server Error');
 
 	return redirect(url_for('projects'))
 

@@ -56,7 +56,7 @@ class Storage:
 		stat, re = self.call('/' + user + '/' + repo, 'GET')
 		return stat == 200
 
-	def list_repos(self, user):
+	def get_repo_list(self, user):
 		stat, re = self.call('/list/' + user, 'GET')
 
 		if stat != 200:
