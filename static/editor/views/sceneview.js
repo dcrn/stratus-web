@@ -130,7 +130,7 @@ SceneView.prototype.setData = function(d) {
 	if (d.config && d.config.defaultSceneID) {
 		this.game[d.config.defaultSceneID].activate();
 	}
-	if (d.config && d.config.clearColour) {
+	if (d.config && typeof d.config.clearColour != undefined) {
 		this.renderer.setClearColor(d.config.clearColour);
 	}
 }
@@ -212,7 +212,7 @@ SceneView.prototype.removeComponent = function(sid, entid, comid) {
 }
 
 SceneView.prototype.updateSettings = function(settings) {
-	if (settings.clearColour) {
+	if (typeof settings.clearColour != 'undefined') {
 		this.renderer.setClearColor(settings.clearColour);
 	}
 }

@@ -59,6 +59,11 @@ Game.load = function(json) {
 		}
 	}
 
+	var sceneids = Object.keys(this.scenes);
+	if (sceneids.length > 0) {
+		this.scenes[sceneids[0]].activate();
+	}
+
 	// Have config and initialized
 	if (json.config && this.renderer) {
 		var config = json.config;
