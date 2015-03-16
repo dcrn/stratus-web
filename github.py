@@ -47,6 +47,17 @@ class GitHub:
 		else:
 			return (False, None)
 
+	def init_repo(self, repo, access_token):
+		status, data = self.api_call('user/repos', access_token=access_token, 
+			post_json={'name': repo})
+
+		if status and 'name' in data:
+			return data['name']
+		return False
+
+	def list_repos(self, access_token):
+		return self.api_call('user/repos', access_token=access_token)
+
 	def rate_limit(self, access_token=None):
 		if access_token:
 			return self.api_call('rate_limit', access_token=access_token)

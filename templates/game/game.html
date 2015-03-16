@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-	<title>Game</title>
+	<title>{{repo}} by {{session['user_info']['login']}}</title>
 	<style>
 		html {margin: 0}
 		body {margin: 0; overflow: hidden; line-height: 0px;}
@@ -16,11 +16,11 @@
 		</script>
 	{% endfor %}
 	<script type="application/json" id="gamedata">
-		{{gamedata|safe}}
+		{% if gamedata %}{{gamedata|safe}}{% endif%}
 	</script>
 	<script>
 		Game.init();
-		var json;
+		var json = {};
 		try {
 			json = JSON.parse(
 				document.getElementById("gamedata").innerHTML

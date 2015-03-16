@@ -1,47 +1,45 @@
 {% raw %}
 <div class="modal fade">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h4 class="modal-title">{{title}}</h4>
+	<div class="modal-dialog modal-content">
+		<div class="modal-header">
+			<h4 class="modal-title">{{title}}</h4>
+		</div>
+		{{#if inputs}}
+		<div class="modal-body">
+			{{#each inputs}}
+			<div class="form-group" data-property="{{@key}}">
+				<label>{{@key}}</label>
+				{{#isArray type}}
+					<select class="form-control">
+						{{#each type}}
+							{{#eq this ../value}}
+							<option value="{{this}}" selected>{{this}}</option>
+							{{else}}
+							<option value="{{this}}">{{this}}</option>
+							{{/eq}}
+						{{/each}}
+					</select>
+				{{else}}
+					{{#eq type "text"}}
+					<input type="text" class="form-control" value="{{value}}">
+					{{/eq}}
+					{{#eq type "bool"}}
+					<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
+					{{/eq}}
+					{{#eq type "colour"}}
+						<br />
+						r: <input type="range" class="form-control" data-axis="r" min="0" max="255" step="1" value="{{value.[0]}}">
+						g: <input type="range" class="form-control" data-axis="g" min="0" max="255" step="1" value="{{value.[1]}}">
+						b: <input type="range" class="form-control" data-axis="b" min="0" max="255" step="1" value="{{value.[2]}}">
+					{{/eq}}
+				{{/isArray}}
 			</div>
-			{{#if inputs}}
-			<div class="modal-body">
-				{{#each inputs}}
-				<div class="form-group" data-property="{{@key}}">
-					<label>{{@key}}</label>
-					{{#isArray type}}
-						<select class="form-control">
-							{{#each type}}
-								{{#eq this ../value}}
-								<option value="{{this}}" selected>{{this}}</option>
-								{{else}}
-								<option value="{{this}}">{{this}}</option>
-								{{/eq}}
-							{{/each}}
-						</select>
-					{{else}}
-						{{#eq type "text"}}
-						<input type="text" class="form-control" value="{{value}}">
-						{{/eq}}
-						{{#eq type "bool"}}
-						<input type="checkbox" class="form-control" {{#if value}}checked{{/if}}>
-						{{/eq}}
-						{{#eq type "colour"}}
-							<br />
-							r: <input type="range" class="form-control" data-axis="r" min="0" max="255" step="1" value="{{value.[0]}}">
-							g: <input type="range" class="form-control" data-axis="g" min="0" max="255" step="1" value="{{value.[1]}}">
-							b: <input type="range" class="form-control" data-axis="b" min="0" max="255" step="1" value="{{value.[2]}}">
-						{{/eq}}
-					{{/isArray}}
-				</div>
-				{{/each}}
-			</div>
-			{{/if}}
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default cancel">Cancel</button>
-				<button type="button" class="btn btn-primary okay">Okay</button>
-			</div>
+			{{/each}}
+		</div>
+		{{/if}}
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default cancel">Cancel</button>
+			<button type="button" class="btn btn-primary okay">Okay</button>
 		</div>
 	</div>
 </div>

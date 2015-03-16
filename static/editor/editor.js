@@ -1,7 +1,9 @@
 var Editor = Editor || {};
 Editor.init = function(gamedata, repodata) {
-	this.gamedata = gamedata;
-	this.repodata = repodata;
+	this.gamedata = gamedata || {};
+	this.gamedata.scenes = this.gamedata.scenes || {};
+	this.repodata = repodata || {};
+	this.repodata.components = this.repodata.components || {};
 	this.selection = {};
 	this.scriptviews = {};
 	this.unsaved = false;
@@ -34,8 +36,8 @@ Editor.init = function(gamedata, repodata) {
 	// Re-render scene to fix camera
 	this.view.main.scene.render();
 
-	// Start autosaving
-	window.addEventListener('blur', this.autoSave.bind(this));
+	// Events
+	window.addEventListener('blur', this.onBlur.bind(this));
 }
 
 Editor.selectScene = function(s) {
@@ -67,6 +69,13 @@ Editor.modified = function() {
 		clearTimeout(this.savetimer);
 
 	this.savetimer = setTimeout(this.autoSave.bind(this), 4000);
+}
+
+Editor.onBlur = function() {
+	if (this.savetimer) {
+		clearTimeout(this.savetimer);
+		this.autoSave();
+	}
 }
 
 Editor.autoSave = function() {
@@ -250,21 +259,27 @@ Editor.performAction = function(type, action) {
 
 			this.view.showModalInput({
 				title: 'Add Component',
-				inputs: {Component: {type: 'text', value: ''}},
+				inputs: {ComponentID: {type: 'text', value: ''}, Component: {type: Components.list(), value: ''}},
 				callback: function(val) {
-					if (!val.Component) return;
-					val.Component = val.Component.trim();
-					if (val.Component === '') return;
+					var comp = (val.ComponentID || '').trim();
+					if (!comp) {
+						comp = val.Component;
+					}
 
-					ent[val.Component] = {};
+					if (comp in ent) {
+						console.log('Already got one');
+						return;
+					}
+
+					ent[comp] = {};
 					self.view.explorer.scenes.addItem(
 						self.selection.scene, 
 						self.selection.entity, 
 						'component',
-						val.Component, 
+						comp, 
 						{}
 					);
-					self.view.main.scene.addComponent(self.selection.scene, self.selection.entity, val.Component);
+					self.view.main.scene.addComponent(self.selection.scene, self.selection.entity, comp);
 					self.view.main.properties.setData(ent);
 					self.modified();
 				}

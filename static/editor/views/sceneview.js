@@ -260,7 +260,7 @@ SceneView.prototype.update = function() {
 
 		for (c in comps) {
 			var com = comps[c];
-			if (c !== 'transform' && 'threeobj' in com) {
+			if (com && c !== 'transform' && 'threeobj' in com) {
 				if (ent.has('transform')) {
 					var transform = ent.get('transform');
 					com.threeobj.position.copy(transform.getPosition());

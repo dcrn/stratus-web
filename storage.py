@@ -13,10 +13,57 @@ class Storage:
 		
 		return resp.status, resp
 
-	def repo_exists(self, user, repo):
-		stat, re = self.call('/' + user + '/' + repo, 'GET')
-		
+	def init_repo(self, user, repo, access_token):
+		stat, re = self.call('/' + user + '/' + repo,
+			'POST', 
+			json.dumps({
+				'origin': 'https://' + user + ':' + access_token + 
+					'@github.com/' + user + '/' + repo + '.git'
+			})
+		)
+
+		return stat == 201
+
+	def pull_repo(self, user, repo):
+		stat, re = self.call('/' + user + '/' + repo + '/pull/origin', 'POST')
 		return stat == 200
+
+	def push_repo(self, user, repo):
+		stat, re = self.call('/' + user + '/' + repo + '/push/origin', 'POST')
+		return stat == 200
+
+	def delete_repo(self, user, repo):
+		stat, re = self.call('/' + user + '/' + repo, 'DELETE')
+		return stat == 200
+
+	def commit_repo(self, user, repo, data):
+		stat, re = self.call('/' + user + '/' + repo + '/commit', 
+			'POST', 
+			json.dumps(data)
+		)
+		return stat == 200
+
+	def get_repo_status(self, user, repo):
+		stat, re = self.call('/' + user + '/' + repo + '/status', 'GET')
+
+		if stat != 200:
+			return False
+
+		j = json.loads(str(re.read(), 'utf-8'))
+		return j
+
+	def get_repo_exists(self, user, repo):
+		stat, re = self.call('/' + user + '/' + repo, 'GET')
+		return stat == 200
+
+	def list_repos(self, user):
+		stat, re = self.call('/list/' + user, 'GET')
+
+		if stat != 200:
+			return False
+
+		j = json.loads(str(re.read(), 'utf-8'))
+		return j
 
 	def get_tree(self, user, repo):
 		stat, re = self.call('/' + user + '/' + repo + '/tree', 'GET')

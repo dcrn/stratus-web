@@ -2,38 +2,143 @@
 {% extends 'web/base.html' %}
 {% block content %}
 	<div class="page-header">
-		<h1>Your Projects</h1>
-		<button class="btn btn-default">Create New Repo
-		</button>
-		<button class="btn btn-default">Clone Existing Repo
-		</button>
+		<h1 class="inline">Your Projects</h1>
+		<a class="btn btn-sm btn-primary" id="clonerepo">
+			<span class="glyphicon glyphicon-duplicate"></span>
+			Clone Existing Repo
+		</a>
+		<a class="btn btn-sm btn-primary" id="initrepo">
+			<span class="glyphicon glyphicon-plus"></span>
+			Create New Repo
+		</a>
 	</div>
 
 	<div class="container">
-		<div class="gameicon">
-			<img src="http://i.imgur.com/9JMCkF1.png" />
-			<br />
-			Car game 1
+		{% for repo in repos %}
+		<div class="well well-sm project">
+			<h1>{{repo}}</h1>
+			<button type="button" class="btn btn-sm btn-danger deletebutton" data-repo="{{repo}}"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+			<a class="btn btn-sm btn-primary" target="_blank" href="/game/{{session['user_info']['login']}}/{{repo}}"><span class="glyphicon glyphicon-play-circle"></span> Play</a>
+			<a class="btn btn-sm btn-primary" target="_blank" href="/editor/{{repo}}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+			<a class="btn btn-sm btn-success" href="#"><span class="glyphicon glyphicon-ok"></span> Publish</a>
 		</div>
-		<div class="gameicon">
-			<img src="http://i.imgur.com/9JMCkF1.png" />
-			<br />
-			Car game 2
-		</div>
-		<div class="gameicon">
-			<img src="http://i.imgur.com/9JMCkF1.png" />
-			<br />
-			Car game 3
-		</div>
-		<div class="gameicon">
-			<img src="http://i.imgur.com/9JMCkF1.png" />
-			<br />
-			Car game 4
-		</div>
-		<div class="gameicon">
-			<img src="http://i.imgur.com/9JMCkF1.png" />
-			<br />
-			Car game 5
+		{% endfor %}
+	</div>
+
+	<div id="initmodal" class="modal fade">
+		<div class="modal-dialog modal-content">
+			<div class="modal-header">
+				<h3>
+					Create New Repository
+				</h3>
+			</div>
+			<div class="modal-body">
+				Repository name:<br />
+				<input type="text" class="form-control">
+				<span class="label label-danger" id="repoexists">Repository already exists</span>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default cancelbutton">Cancel</button>
+				<button type="button" class="btn btn-primary okaybutton">Okay</button>
+			</div>
 		</div>
 	</div>
+
+	<div id="deletemodal" class="modal fade">
+		<div class="modal-dialog modal-content">
+			<div class="modal-header">
+				<h3>Delete repo <span id="deletereponame"></span>?</h3>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default cancelbutton">Cancel</button>
+				<button type="button"  class="btn btn-danger okaybutton">Okay</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="clonemodal" class="modal fade">
+		<div class="modal-dialog modal-content">
+			<div class="modal-header">
+				<h3>
+					Clone Existing Repository
+				</h3>
+			</div>
+			<div class="modal-body">
+				<ul class="list-group">
+				{% for repo in session['user_repos'] %}
+					{% if repo not in repos %}
+					<li class="list-group-item">
+						<a href="https://github.com/{{session['user_info']['login']}}/{{repo}}">{{repo}}</a>
+						<a href="/projects/clone/{{repo}}" class="btn btn-primary btn-sm">Clone</a></li>
+					{% endif %}
+				{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block scripts %}
+	<script>
+		var repos = [
+			{% for r in repos %}
+			'{{r}}',
+			{% endfor %}
+		];
+		var github_repos = [
+			{% for r in session['user_repos'] %}
+			'{{r}}',
+			{% endfor %}
+		];
+
+		// Setup new repo modal
+		$('#repoexists').toggle(false);
+		$('#initmodal .btn.cancelbutton, #deletemodal .btn.cancelbutton').click(function() {
+			$('#initmodal').modal('hide');
+			$('#deletemodal').modal('hide');
+		});
+		$('#initmodal .btn.okaybutton').click(function() {
+			// redirect to /projects/init/NAME
+			var name = $('#initmodal input').val().trim();
+			if (name == ''){
+				$('#initmodal input').val('');
+				$('#initmodal').modal('hide');
+				return;
+			}
+
+			window.location.href = '/projects/init/' + name;
+		});
+		$('#initmodal input').on('input', function() {
+			if (repos.indexOf($(this).val()) != -1 ||
+					github_repos.indexOf($(this).val()) != -1) {
+				$('#repoexists').toggle(true);
+			}
+			else {
+				$('#repoexists').toggle(false);
+			}
+		});
+		$('#initrepo').click(function() {
+			$('#initmodal').modal('show');
+			$('#initmodal input').focus();
+		});
+
+		// Setup delete repo modal
+		$('.deletebutton').click(function() {
+			var reponame = $(this).data('repo');
+			$('#deletereponame').text(reponame);
+			$('#deletemodal').modal('show');
+
+			$('#deletemodal .okaybutton').unbind();
+			$('#deletemodal .okaybutton').click(function() {
+				window.location.href = '/projects/delete/' + reponame;
+			});
+		});
+
+		// Setup clone repo modal
+		$('#clonerepo .btn').click(function() {
+			$('#clonemodal').modal('hide');
+		});
+		$('#clonerepo').click(function() {
+			$('#clonemodal').modal('show');
+		});
+	</script>
 {% endblock %}

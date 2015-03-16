@@ -60,13 +60,17 @@ def login():
 			return error(401, 'Unauthorized')
 
 		status, resuser = g.github.get_user(restoken['access_token'])
-
 		if not status:
 			return error(500, 'Internal Server Error')
-		
+
 		# Set up session variables
 		session['access_token'] = restoken['access_token']
 		session['user_info'] = resuser
+
+		# Get a list of repos on github
+		status, repos = g.github.list_repos(session['access_token'])
+		if status:
+			session['user_repos'] = [x['name'] for x in repos]
 
 	return redirect(url_for('index'))
 
@@ -78,19 +82,68 @@ def logout():
 @app.route('/projects')
 def projects():
 	if 'access_token' in session:
-		return render_template('web/projects.html')
+		repos = g.storage.list_repos(session['user_info']['login'])
+		return render_template('web/projects.html', repos=repos)
 	else:
 		return error(403, 'Forbidden')
+
+@app.route('/projects/init/<repo>')
+def init(repo):
+	if 'access_token' not in session:
+		return error(403, 'Forbidden')
+
+	access_token = session['access_token']
+	user = session['user_info']['login']
+
+	# Init on github and on storage
+	stat = g.github.init_repo(repo, access_token)
+	if stat is False: 
+		return error(500, 'Internal Server Error');
+
+	stat = g.storage.init_repo(user, repo, access_token)
+	if stat is False: 
+		return error(500, 'Internal Server Error');
+
+	# init gamedata.json
+	g.storage.set_file(user, repo, 'gamedata.json', '{}')
+
+	return redirect(url_for('projects'))
+
+@app.route('/projects/delete/<repo>')
+def delete(repo):
+	if 'access_token' not in session:
+		return error(403, 'Forbidden')
+
+	user = session['user_info']['login']
+	g.storage.delete_repo(user, repo)
+
+	return redirect(url_for('projects'))
+
+@app.route('/projects/clone/<repo>')
+def clone(repo):
+	if 'access_token' not in session:
+		return error(403, 'Forbidden')
+
+	access_token = session['access_token']
+	user = session['user_info']['login']
+
+	stat = g.storage.init_repo(user, repo, access_token)
+	if stat is False: 
+		return error(500, 'Internal Server Error');
+
+	stat = g.storage.pull_repo(user, repo)
+	if stat is False: 
+		return error(500, 'Internal Server Error');
+
+	return redirect(url_for('projects'))
 
 @app.route('/editor/<repo>')
 def editor(repo):
 	if ('access_token' in session):
 		user = session['user_info']['login']
-		if (g.storage.repo_exists(user, repo)):
+		if (g.storage.get_repo_exists(user, repo)):
 			gamedata, components = g.storage.get_game_files(user, repo)
 			tree = g.storage.get_tree(user, repo)
-			if not gamedata or not tree:
-				return error(404, 'Not Found')
 
 			return render_template(
 				'editor/editor.html', 
@@ -109,7 +162,7 @@ def file(repo, file):
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
-	if not g.storage.repo_exists(user, repo):
+	if not g.storage.get_repo_exists(user, repo):
 		return error(404, 'Not Found')
 
 	if request.method == 'GET':
@@ -132,13 +185,12 @@ def game(user, repo):
 	if ('access_token' in session and
 		session['user_info']['login'] == user):
 
-		if (g.storage.repo_exists(user, repo)):
+		if (g.storage.get_repo_exists(user, repo)):
 			gamedata, components = g.storage.get_game_files(user, repo)
-			if not gamedata:
-				return error(404, 'Not Found')
 
 			return render_template(
 				'game/game.html', 
+				repo=repo,
 				gamedata=gamedata, 
 				components=components
 			)

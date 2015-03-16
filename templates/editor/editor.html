@@ -20,10 +20,10 @@
 		</script>
 	{% endfor %}
 	<script type="application/json" id="gamedata">
-		{{gamedata|safe}}
+		{% if gamedata %}{{gamedata|safe}}{% endif%}
 	</script>
 	<script type="application/json" id="repotree">
-		{{tree|safe}}
+		{% if gamedata %}{{tree|safe}}{% endif %}
 	</script>
 
 	{# Load all views + templates #}
@@ -63,7 +63,7 @@
 	{% endfor %}
 	
 	<script>
-		var gamejson, treejson;
+		var gamejson = {}, treejson = {};
 		try {
 			gamejson = JSON.parse(
 				document.getElementById("gamedata").innerHTML

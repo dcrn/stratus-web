@@ -1,0 +1,79 @@
+body {
+	background-color: #fff;
+}
+
+#navfix {
+	height: 64px;
+	display: block;
+}
+
+.jumbotron {
+	color: #222;
+	border: 1px solid #ddd;
+	margin-top: -20px;
+	padding: 20px;
+	background-color: #f8f8f8;
+}
+
+.jumbotron img {
+	border: 1px solid #222;
+	border-radius: 6px;
+}
+
+.userbox {
+	border: 1px solid #222;
+	border-radius: 4px;
+	padding: 1px;
+	padding-right: 4px;
+	background-color: #fff;
+}
+
+.userbox > img {
+	border-radius: 4px;
+}
+
+.page-header h1 {
+	display: inline-block;
+	font-size: 1.8em;
+	line-height: 1.8em;
+	margin: 0;
+}
+.page-header a.btn {
+	float: right;
+	display: inline-block;
+	margin-top: 16px;
+	margin-left: 8px;
+}
+
+.container {
+	width: 70%;
+}
+.container .container {
+	width: 95%;
+}
+
+.project {
+	height: 48px;
+}
+
+.project h1 {
+	margin: 0;
+	float: left;
+	font-size: 1.4em;
+	line-height: 1.4em;
+}
+
+.project .btn {
+	float: right;
+	margin-left: 8px;
+}
+
+#clonemodal .modal-dialog {
+	width: 35% !important;
+}
+#clonemodal .list-group-item a.btn {
+	float: right;
+	padding-left: 20px !important;
+	padding-right: 20px !important;
+	margin-top: -5px;
+}
