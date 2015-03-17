@@ -1,5 +1,4 @@
 venv
-config.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -44,3 +43,8 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
