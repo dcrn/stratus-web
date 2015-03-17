@@ -67,12 +67,23 @@ def login():
 		session['access_token'] = restoken['access_token']
 		session['user_info'] = resuser
 
+		# Get the user's email addresses
+		status, emails = g.github.get_user_emails(session['access_token'])
+
+		# Get primary email
+		if status and len(emails) > 0:
+			print(emails)
+			primary = emails[0]['email']
+			for em in emails:
+				if em['primary']:
+					session['user_info']['email'] = em['email']
+
 		# Get a list of repos on github
 		status, repos = g.github.list_repos(session['access_token'])
 		if status:
 			session['user_repos'] = [x['name'] for x in repos]
 
-	return redirect(url_for('index'))
+	return redirect(url_for('dashboard'))
 
 @app.route('/logout')
 def logout():
@@ -111,12 +122,14 @@ def commit(repo):
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
+	name = session['user_info']['name'] or ''
+	email = session['user_info']['email'] or ''
 	msg = request.form.get('message')
 
 	stat = g.storage.get_repo_status(user, repo)
 
 	# Make commit list from modified/removed/untracked files
-	commit = {'A': [], 'R': [], 'msg': msg}
+	commit = {'A': [], 'R': [], 'msg': msg, 'name': name, 'email': email}
 	commit['A'] += stat['U']
 	if 'M' in stat:
 		for f in stat['M']:

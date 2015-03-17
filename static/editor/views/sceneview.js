@@ -98,9 +98,6 @@ SceneView.prototype.onMouseDown = function(e) {
 	var handled = this.selection.onMouseDown(e.offsetX, e.offsetY);
 	if (handled) return;
 
-	this.move_forward = 0;
-	this.move_right = 0;
-	this.move_up = 0;
 	this.looking = new THREE.Vector2(e.offsetX, e.offsetY);
 }
 
@@ -169,14 +166,24 @@ SceneView.prototype.setSelection = function(eid) {
 	this.selection.setEntity(null);
 }
 
-SceneView.prototype.addScene = function(sid) {
-	this.game[sid] = new Scene();
+SceneView.prototype.addScene = function(sid, data) {
+	if (data) {
+		this.game[sid] = Game.loadScene(data);
+	}
+	else {
+		this.game[sid] = new Scene();
+	}
 }
 
-SceneView.prototype.addEntity = function(sid, entid) {
+SceneView.prototype.addEntity = function(sid, entid, data) {
 	var sc = this.game[sid];
 	if (!sc) return;
-	sc.add(entid, new Entity());
+	if (data) {
+		sc.add(entid, Game.loadEntity(data));
+	}
+	else {
+		sc.add(entid, new Entity());
+	}
 }
 
 SceneView.prototype.addComponent = function(sid, entid, comid) {

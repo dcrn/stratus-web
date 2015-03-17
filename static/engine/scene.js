@@ -69,7 +69,24 @@ Scene.prototype.remove = function(entid) {
 	}
 }
 
+Scene.prototype.updateAllMaterials = function() {
+	var e, c, ent, coms, com;
+	for (e in this.entities) {
+		ent = this.entities[e];
+		coms = ent.components();
+		for (c in coms) {
+			com = coms[c];
+			if (com.threeobj && com.threeobj.material) {
+				com.threeobj.material.needsUpdate = true;
+			}
+		}
+	}
+}
+
 Scene.prototype.onComponentAdded = function(ent, com) {
+	if (com.id == 'light')
+		this.updateAllMaterials();
+	
 	if (com.threeobj)
 		this.threeobj.add(com.threeobj);
 	if (com.ammoobj)

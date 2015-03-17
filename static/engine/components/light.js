@@ -1,16 +1,6 @@
 LightComponent = function(options) {
 	this.target = null;
 
-	this.type = options.type;
-	if (options.type == 'ambient')
-		this.threeobj = new THREE.AmbientLight();
-	else if (options.type == 'spotlight')
-		this.threeobj = new THREE.SpotLight();
-	else if (options.type == 'directional')
-		this.threeobj = new THREE.DirectionalLight();
-	else
-		this.threeobj = new THREE.PointLight();
-
 	this.applyOptions(options);
 }
 
@@ -22,6 +12,26 @@ LightComponent.prototype.onComponentRemove = function(ent, com) {
 }
 
 LightComponent.prototype.applyOptions = function(options) {
+	var ent;
+	if (this.entity) {
+		ent = this.entity;
+		ent.remove(this);
+	}
+
+	this.type = options.type;
+	if (options.type == 'ambient')
+		this.threeobj = new THREE.AmbientLight();
+	else if (options.type == 'spotlight')
+		this.threeobj = new THREE.SpotLight();
+	else if (options.type == 'directional')
+		this.threeobj = new THREE.DirectionalLight();
+	else
+		this.threeobj = new THREE.PointLight();
+
+	if (ent) {
+		ent.add(this);
+	}
+
 	this.setTarget(options.target);
 	this.targetEntID = options.target;
 
@@ -30,6 +40,10 @@ LightComponent.prototype.applyOptions = function(options) {
 	this.setDistance(options.distance);
 	this.setAngle(options.angle);
 	this.setExponent(options.exponent);
+
+	if (this.type == 'ambient' || this.type == 'point') {
+		return;
+	}
 
 	if (!options.castShadow) {
 		this.setShadowDarkness(0.0);

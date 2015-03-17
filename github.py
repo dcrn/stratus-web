@@ -73,3 +73,6 @@ class GitHub:
 
 	def get_user(self, access_token):
 		return self.api_call('user', access_token=access_token)
+
+	def get_user_emails(self, access_token):
+		return self.api_call('user/emails', access_token=access_token)

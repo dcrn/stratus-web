@@ -30,7 +30,7 @@ ExplorerScriptsItemView.prototype.action = function(e) {
 		Editor.editScript(id);
 	}
 	else if (action == 'duplicate') {
-		console.log('Not implemented');
+		Editor.duplicateScript(id);
 	}
 	else if (action == 'delete') {
 		Editor.deleteScript(id);

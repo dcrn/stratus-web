@@ -151,6 +151,39 @@ Editor.deleteScript = function(filename) {
 	});
 }
 
+Editor.duplicateScript = function(srcfile) {
+	var self = this;
+	this.view.showModalInput({
+		title: 'Duplicate Script',
+		inputs: {filename: {type: 'text', value: ''}},
+		callback: function(val) {
+			var filename = val.filename.trim();
+			if (filename == '') return;
+			if (filename.slice(-3) !== '.js')
+				filename += '.js';
+
+			$.ajax({
+				type:'GET', 
+				data: '', 
+				url: window.location.pathname + 
+					'/components/' + srcfile,
+				success: function(data) {
+					$.ajax({
+						type:'POST', 
+						data: data, 
+						url: window.location.pathname + 
+							'/components/' + filename,
+						success: function() {
+							self.repodata.components[filename] = true;
+							self.view.explorer.scripts.setData(self.repodata.components);
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
 Editor.newScript = function() {
 	var self = this;
 	this.view.showModalInput({
@@ -249,7 +282,24 @@ Editor.performAction = function(type, action) {
 			});
 		}
 		else if (action == 'duplicate') {
-			console.log('Not implemented');
+			var self = this;
+			this.view.showModalInput({
+				title: 'Duplicate Script',
+				inputs: {ID: {type: 'text', value: ''}},
+				callback: function(val) {
+					var ID = val.ID.trim();
+					if (ID == '') return;
+
+					var sc = self.gamedata.scenes[self.selection.scene];
+					var cpy = $.extend(true, {}, sc);
+
+					self.gamedata.scenes[ID] = cpy;
+					self.view.main.scene.addScene(ID, cpy);
+					self.view.explorer.scenes.addItem(null, null, 'scene', ID, cpy.entities || {});
+
+					self.modified();
+				}
+			});
 		}
 	}
 	else if (type == 'entity') {
@@ -298,7 +348,25 @@ Editor.performAction = function(type, action) {
 			});
 		}
 		else if (action == 'duplicate') {
-			console.log('Not implemented');
+			var self = this;
+			this.view.showModalInput({
+				title: 'Duplicate Entity',
+				inputs: {ID: {type: 'text', value: ''}},
+				callback: function(val) {
+					var ID = val.ID.trim();
+					if (ID == '') return;
+
+					var sc = self.gamedata.scenes[self.selection.scene];
+					var ent = sc.entities[self.selection.entity];
+					var cpy = $.extend(true, {}, ent);
+					
+					sc.entities[ID] = cpy;
+					self.view.main.scene.addEntity(self.selection.scene, ID, cpy);
+					self.view.explorer.scenes.addItem(self.selection.scene, null, 'entity', ID, cpy || {});
+
+					self.modified();
+				}
+			});
 		}
 	}
 	else if (type == 'component') {
