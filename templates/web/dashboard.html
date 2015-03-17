@@ -29,7 +29,7 @@
 		{% for repo in repos %}
 		<div class="panel panel-default project">
 			<div class="panel-heading">
-				<h1>{{repo}}</h1>
+				<h1>{{repo}}<small><a href="https://github.com/{{session['user_info']['login']}}/{{repo}}">View on GitHub</a></small></h1>
 				<button type="button" class="btn btn-sm btn-danger deletebutton" data-repo="{{repo}}"><span class="glyphicon glyphicon-remove"></span> Delete</button>
 				<a class="btn btn-sm btn-primary" target="_blank" href="/game/{{session['user_info']['login']}}/{{repo}}"><span class="glyphicon glyphicon-play-circle"></span> Play</a>
 				<a class="btn btn-sm btn-primary" target="_blank" href="/editor/{{repo}}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
