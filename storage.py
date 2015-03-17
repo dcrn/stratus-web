@@ -60,7 +60,7 @@ class Storage:
 		stat, re = self.call('/list/' + user, 'GET')
 
 		if stat != 200:
-			return False
+			return []
 
 		j = json.loads(str(re.read(), 'utf-8'))
 		return j
