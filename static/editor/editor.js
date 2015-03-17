@@ -37,6 +37,7 @@ Editor.init = function(gamedata, repodata) {
 	this.view.main.scene.render();
 
 	// Events
+	window.onbeforeunload = this.onClose.bind(this);
 	window.addEventListener('blur', this.onBlur.bind(this));
 }
 
@@ -71,6 +72,13 @@ Editor.modified = function() {
 	this.savetimer = setTimeout(this.autoSave.bind(this), 4000);
 }
 
+Editor.onClose = function() {
+	if (this.savetimer) {
+		clearTimeout(this.savetimer);
+		this.autoSave(true);
+	}
+}
+
 Editor.onBlur = function() {
 	if (this.savetimer) {
 		clearTimeout(this.savetimer);
@@ -78,9 +86,10 @@ Editor.onBlur = function() {
 	}
 }
 
-Editor.autoSave = function() {
+Editor.autoSave = function(sync) {
 	$.ajax({
 		type:'POST', 
+		async: !sync,
 		data: JSON.stringify(this.gamedata, null, '\t') + '\n', 
 		url: window.location.pathname + 
 			'/gamedata.json'
@@ -145,6 +154,18 @@ Editor.deleteScript = function(filename) {
 				success: function() {
 					delete self.repodata.components[filename];
 					self.view.explorer.scripts.setData(self.repodata.components);
+
+					if (self.scriptviews[filename]) {
+						var tab = self.view.main.tabs.findTab(self.scriptviews[filename]);
+						
+						if (tab) {
+							self.view.main.tabs.remove(tab.item, tab.panel);
+							self.view.main.tabs.showTab(
+								self.view.main.tabs.numTabs() - 1
+							);
+						}
+						delete self.scriptviews[filename];
+					}
 				}
 			});
 		}

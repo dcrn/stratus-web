@@ -13,7 +13,7 @@ SelectionObject = function(renderer, cam) {
 	this.handles = [];
 	this.planes = [];
 
-	var box = new THREE.IcosahedronGeometry(0.1);
+	var handlemesh = new THREE.IcosahedronGeometry(0.15);
 	var zero = new Vector3();
 	var colours = [0xFF0000, 0x00FF00, 0x0000FF];
 
@@ -36,7 +36,7 @@ SelectionObject = function(renderer, cam) {
 		g.vertices.push(zero, v);
 
 		self.handles[i] = new THREE.Mesh(
-			box,
+			handlemesh,
 			new THREE.MeshBasicMaterial({color: colours[i]})
 		);
 		self.handles[i].position.add(v);
@@ -138,7 +138,7 @@ SelectionObject.prototype.update = function() {
 			this.mesh.quaternion.copy(t.getRotation());
 			var s = Math.max(
 				Math.max.apply(null, t.getScale().toArray()),
-				8
+				10
 			);
 			this.mesh.scale.set(s, s, s);
 		}

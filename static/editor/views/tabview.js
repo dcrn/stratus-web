@@ -54,6 +54,15 @@ TabView.prototype.remove = function(item, panel) {
 	this.panels.splice(this.panels.indexOf(panel));
 }
 
+TabView.prototype.findTab = function(view) {
+	// Find tab with view in it
+	for (var i = 0; i < this.panels.length; i++) {
+		if (this.panels[i].content == view) {
+			return {item: this.items[i], panel: this.panels[i]};
+		}
+	}
+}
+
 TabView.prototype.numTabs = function() {
 	return this.items.length;
 }
