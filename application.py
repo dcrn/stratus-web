@@ -241,6 +241,11 @@ def delete(repo):
 	if not g.storage.get_repo_exists(user, repo):
 		return error(404, 'Not Found')
 
+
+	published = g.db.published.find_one({'author': user, 'repo': repo})
+	if (published):
+		g.db.published.remove({'author': user, 'repo': repo}, multi=False)
+
 	stat = g.storage.delete_repo(user, repo)
 
 	if stat is False:

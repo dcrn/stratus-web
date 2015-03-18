@@ -26,7 +26,8 @@
 	</div>
 
 	<div class="container">
-		{% if len(repos) == 0 %}
+		{% if repos|length == 0 %}
+		<br />
 		<div class="alert alert-info text-center">Create or clone a repo above to get started.</div>
 		{% endif %}
 		{% for repo in repos %}
