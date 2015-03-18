@@ -263,8 +263,8 @@ Editor.newScene = function() {
 					"camera": {}
  				}
  			}};
-			self.view.main.scene.addScene(val.ID);
-			self.view.explorer.scenes.addItem(null, null, 'scene', val.ID, {});
+			self.view.main.scene.addScene(val.ID, self.gamedata.scenes[val.ID]);
+			self.view.explorer.scenes.addItem(null, null, 'scene', val.ID, self.gamedata.scenes[val.ID].entities);
 
 			self.selectScene(val.ID);
 			self.modified();
