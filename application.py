@@ -365,9 +365,8 @@ def file(repo, file):
 @app.route('/game/<user>/<repo>')
 def game(user, repo):
 	published = g.db.published.find_one({'author': user, 'repo': repo})
-	if not published and 'access_token' not in session:
-		return error(403, 'Forbidden')
-	elif 'access_token' in session and session['user_info']['login'] != user:
+
+	if not (published or 'access_token' in session and session['user_info']['login'] == user):
 		return error(403, 'Forbidden')
 
 	if not g.storage.get_repo_exists(user, repo):
