@@ -76,16 +76,16 @@ Editor.onClose = function() {
 	if (this.savetimer) {
 		clearTimeout(this.savetimer);
 		this.autoSave(true);
-		Editor.saveAllScripts();
 	}
+	Editor.saveAllScripts(true);
 }
 
 Editor.onBlur = function() {
 	if (this.savetimer) {
 		clearTimeout(this.savetimer);
 		this.autoSave();
-		Editor.saveAllScripts();
 	}
+	Editor.saveAllScripts(true);
 }
 
 Editor.autoSave = function(sync) {
@@ -98,19 +98,20 @@ Editor.autoSave = function(sync) {
 	});
 }
 
-Editor.saveAllScripts = function() {
+Editor.saveAllScripts = function(sync) {
 	for (var f in this.scriptviews) {
-		this.saveScript(f);
+		this.saveScript(f, sync);
 	}
 }
 
-Editor.saveScript = function(filename) {
+Editor.saveScript = function(filename, sync) {
 	if (!this.scriptviews[filename]) {
 		return;
 	}
 
 	$.ajax({
 		type:'POST', 
+		async: !sync,
 		data: this.scriptviews[filename].getData(), 
 		url: window.location.pathname + 
 			'/components/' + 
