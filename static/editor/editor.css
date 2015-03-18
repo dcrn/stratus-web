@@ -165,6 +165,10 @@ ul.expl li.selected > button:hover {
 	height: 100%;
 }
 
+#scene, #scene canvas {
+	user-select: none;
+}
+
 /* Script */
 .script {
 	position: absolute !important;

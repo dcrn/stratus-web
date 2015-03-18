@@ -95,6 +95,8 @@ SceneView.prototype.updateMovement = function() {
 }
 
 SceneView.prototype.onMouseDown = function(e) {
+	window.getSelection().removeAllRanges();
+
 	var handled = this.selection.onMouseDown(e.offsetX, e.offsetY);
 	if (handled) return;
 

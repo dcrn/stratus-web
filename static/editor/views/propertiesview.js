@@ -9,8 +9,14 @@ PropertiesView = function() {
 
 PropertiesView.prototype.setData = function(d) {
 	if (d) {
+		var coms = Object.keys(d);
+		coms.sort();
+
 		this.info = {}
-		for (comid in d) {
+		var comid, i;
+		for (i in coms) {
+			comid = coms[i];
+			
 			this.info[comid] = {};
 
 			var options = Components.getDefaults(
@@ -25,8 +31,14 @@ PropertiesView.prototype.setData = function(d) {
 				val = options[p];
 				type = props[p].type;
 
-				if (type == 'colour')
+				if (type =='quaternion') {
+					e = new THREE.Euler();
+					e.setFromQuaternion(new THREE.Quaternion(val[0], val[1], val[2], val[3]), 'ZYX');
+					val = [e.x, e.y, e.z];
+				}
+				if (type == 'colour') {
 					val = [val >> 16 & 0xFF, val >> 8 & 0xFF, val & 0xFF];
+				}
 
 				this.info[comid][p] = {
 					type: type,
@@ -72,8 +84,11 @@ PropertiesView.prototype.oninput = function(e) {
 		if (type == 'vector')
 			val = {type: type, parameters: [x, y, z]};
 		else if (type == 'quaternion') {
-			var w = Number.parseFloat($group.find('[data-axis=w]').val());
-			val = {type: type, parameters: [x, y, z, w]};
+			var q = new THREE.Quaternion();
+			var e = new THREE.Euler(x, y, z, 'ZYX');
+			q.setFromEuler(e);
+
+			val = {type: type, parameters: [q.x, q.y, q.z, q.w]};
 		}
 	}
 	else if (type == 'colour') {

@@ -40,10 +40,9 @@
 				{{/eq}}
 				{{#eq type "quaternion"}}
 					<br />
-					x: <input type="range" class="form-control" data-axis="x" min="-1" max="1" step="0.01" value="{{value.[0]}}">
-					y: <input type="range" class="form-control" data-axis="y" min="-1" max="1" step="0.01" value="{{value.[1]}}">
-					z: <input type="range" class="form-control" data-axis="z" min="-1" max="1" step="0.01" value="{{value.[2]}}">
-					w: <input type="range" class="form-control" data-axis="w" min="-1" max="1" step="0.01" value="{{value.[3]}}">
+					pitch: <input type="range" class="form-control" data-axis="x" min="0" max="6.2831" step="0.01" value="{{value.[0]}}">
+					yaw: <input type="range" class="form-control" data-axis="z" min="0" max="6.2831" step="0.261799" value="{{value.[2]}}">
+					roll: <input type="range" class="form-control" data-axis="y" min="0" max="6.2831" step="0.261799" value="{{value.[1]}}">
 				{{/eq}}
 				{{#eq type "colour"}}
 					<br />
