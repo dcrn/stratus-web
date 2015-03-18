@@ -41,7 +41,7 @@ ModalInputView = function(options) {
 			else {
 				ret[property] = $(this).find('input, select').val();
 
-				if (ret[property].trim() === '')
+				if ((ret[property] || '').trim() === '')
 					delete ret[property];
 			}
 		});
