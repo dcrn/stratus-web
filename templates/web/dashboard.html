@@ -1,4 +1,4 @@
-{% set page='dashboard' %}
+{% set page='Dashboard' %}
 {% extends 'web/base.html' %}
 {% block content %}
 	<div class="notifications">
@@ -33,7 +33,11 @@
 				<button type="button" class="btn btn-sm btn-danger deletebutton" data-repo="{{repo}}"><span class="glyphicon glyphicon-remove"></span> Delete</button>
 				<a class="btn btn-sm btn-primary" target="_blank" href="/game/{{session['user_info']['login']}}/{{repo}}"><span class="glyphicon glyphicon-play-circle"></span> Play</a>
 				<a class="btn btn-sm btn-primary" target="_blank" href="/editor/{{repo}}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-				<a class="btn btn-sm btn-success" href="#"><span class="glyphicon glyphicon-ok"></span> Publish</a>
+				{% if published[repo] %}
+				<a href="/dashboard/publish/{{repo}}" class="btn btn-sm btn-default" href="#"><span class="glyphicon glyphicon-remove"></span> Unpublish</a>
+				{% else %}
+				<a href="/dashboard/publish/{{repo}}" class="btn btn-sm btn-success" href="#"><span class="glyphicon glyphicon-ok"></span> Publish</a>
+				{% endif %}
 			</div>
 
 			<div class="panel-body">

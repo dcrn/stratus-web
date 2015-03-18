@@ -1,12 +1,12 @@
+{% set page=page %}
 <!doctype html>
 <html lang="en">
 <head>
-	<title>FYP</title>
+	<title>Stratus - {{page}}</title>
 	<link href="{{url_for('static', filename='lib/css/bootstrap.min.css')}}" rel="stylesheet">
 	<link href="{{url_for('static', filename='web/style.css')}}" rel="stylesheet">
 </head>
 <body>
-	{% set page=page %}
 	{% include 'web/nav.html' %}
 
 	<div class="container">
@@ -17,7 +17,7 @@
 	<br />
 	<div class="container text-center">
 		<hr />
-		<small>Declan Curran - Final Year Project - DIT 2015</small>
+		<small>Stratus - Declan Curran - Final Year Project - DIT 2015</small>
 	</div>
 	<br />
 

@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, url_for, jsonify, render_template, session, g
 from github import GitHub
 from storage import Storage
+from pymongo import MongoClient
 import time, json, jinja2
 
 app = Flask(__name__)
@@ -22,8 +23,12 @@ def before_req():
 	g.github = GitHub(
 		app.config.get('GITHUB_CLIENT_ID'),
 		app.config.get('GITHUB_CLIENT_SECRET'),
-		'github.com/dcrn/fyp'
+		'github.com/dcrn'
 	)
+
+	# Connect to MongoDB server
+	g.mongo = MongoClient(app.config.get('MONGO_ADDR'))
+	g.db = g.mongo.stratus;
 
 	# Set up Storage API
 	g.storage = Storage(
@@ -44,7 +49,9 @@ def before_req():
 
 @app.route('/')
 def index():
-	return render_template('web/index.html')
+	return render_template('web/index.html',
+		latest=list(g.db.published.find(limit=5, sort=[('timestamp', 1)]))
+	)
   
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -90,6 +97,12 @@ def logout():
 	session.clear()
 	return redirect(url_for('index'))
 
+@app.route('/games')
+def games():
+	return render_template('web/games.html', 
+		latest=list(g.db.published.find(sort=[('timestamp', 1)]))
+	)
+
 @app.route('/dashboard')
 def dashboard():
 	if 'access_token' not in session:
@@ -97,6 +110,11 @@ def dashboard():
 
 	user = session['user_info']['login']
 	repos = g.storage.get_repo_list(user)
+
+	published = {}
+	for doc in g.db.published.find({'author': user}):
+		published[doc['repo']] = True
+
 	# Get status for each repo
 	status = {}
 	for r in repos:
@@ -107,14 +125,42 @@ def dashboard():
 		else:
 			status[r] = True
 			for v in stat.values():
-				if len(v) is not 0:
+				if len(v) != 0:
 					break;
 			else:
 				status[r] = False
 
 	return render_template('web/dashboard.html', 
 		repos=repos,
-		status=status)
+		status=status,
+		published=published)
+
+@app.route('/dashboard/publish/<repo>')
+def publish(repo):
+	if 'access_token' not in session:
+		return error(403, 'Forbidden')
+
+	user = session['user_info']['login']
+	if not g.storage.get_repo_exists(user, repo):
+		return error(404, 'Not Found')
+
+	curr = g.db.published.find_one({'author': user, 'repo': repo})
+
+	if (curr):
+		g.db.published.remove({'author': user, 'repo': repo}, multi=False)
+		return redirect(url_for('dashboard', 
+			alert="Repo unpublished", 
+			alert_type="success"))
+	else:
+		g.db.published.insert({
+			'author': user,
+			'repo': repo,
+			'timestamp': int(time.time())
+		})
+
+		return redirect(url_for('dashboard', 
+			alert="Repo published successfully", 
+			alert_type="success"))
 
 @app.route('/dashboard/commit/<repo>', methods=['POST'])
 def commit(repo):
@@ -122,6 +168,9 @@ def commit(repo):
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
+	if not g.storage.get_repo_exists(user, repo):
+		return error(404, 'Not Found')
+
 	name = session['user_info']['name'] or ''
 	email = session['user_info']['email'] or ''
 	msg = request.form.get('message')
@@ -155,6 +204,8 @@ def init(repo):
 
 	access_token = session['access_token']
 	user = session['user_info']['login']
+	if g.storage.get_repo_exists(user, repo):
+		return error(409, 'Conflict')
 
 	# Init on github and on storage
 	stat = g.github.init_repo(repo, access_token)
@@ -187,6 +238,9 @@ def delete(repo):
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
+	if not g.storage.get_repo_exists(user, repo):
+		return error(404, 'Not Found')
+
 	stat = g.storage.delete_repo(user, repo)
 
 	if stat is False:
@@ -205,6 +259,8 @@ def clone(repo):
 
 	access_token = session['access_token']
 	user = session['user_info']['login']
+	if g.storage.get_repo_exists(user, repo):
+		return error(409, 'Conflict')
 
 	stat = g.storage.init_repo(user, repo, access_token)
 	if stat is False: 
@@ -228,6 +284,9 @@ def push(repo):
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
+	if not g.storage.get_repo_exists(user, repo):
+		return error(404, 'Not Found')
+
 	if not g.storage.push_repo(user, repo):
 		return redirect(url_for('dashboard', 
 			alert="Unable to push to remote", 
@@ -243,6 +302,9 @@ def pull(repo):
 		return error(403, 'Forbidden')
 
 	user = session['user_info']['login']
+	if not g.storage.get_repo_exists(user, repo):
+		return error(404, 'Not Found')
+
 	if not g.storage.pull_repo(user, repo):
 		return redirect(url_for('dashboard', 
 			alert="Unable to pull to remote", 
@@ -254,22 +316,22 @@ def pull(repo):
 
 @app.route('/editor/<repo>')
 def editor(repo):
-	if ('access_token' in session):
-		user = session['user_info']['login']
-		if (g.storage.get_repo_exists(user, repo)):
-			gamedata, components = g.storage.get_game_files(user, repo)
-			tree = g.storage.get_tree(user, repo)
-
-			return render_template(
-				'editor/editor.html', 
-				gamedata=gamedata, 
-				components=components,
-				tree=json.dumps(tree)
-			)
-		else:
-			return error(404, 'Not Found')
-	else:
+	if 'access_token' not in session:
 		return error(403, 'Forbidden')
+
+	user = session['user_info']['login']
+	if not g.storage.get_repo_exists(user, repo):
+		return error(404, 'Not Found')
+	
+	gamedata, components = g.storage.get_game_files(user, repo)
+	tree = g.storage.get_tree(user, repo)
+
+	return render_template(
+		'editor/editor.html', 
+		gamedata=gamedata, 
+		components=components,
+		tree=json.dumps(tree)
+	)
 
 @app.route('/editor/<repo>/<path:file>', methods=['GET', 'POST', 'DELETE'])
 def file(repo, file):
@@ -297,23 +359,24 @@ def file(repo, file):
 
 @app.route('/game/<user>/<repo>')
 def game(user, repo):
-	if ('access_token' in session and
-		session['user_info']['login'] == user):
-
-		if (g.storage.get_repo_exists(user, repo)):
-			gamedata, components = g.storage.get_game_files(user, repo)
-
-			return render_template(
-				'game/game.html', 
-				repo=repo,
-				gamedata=gamedata, 
-				components=components
-			)
-		else:
-			return error(404, 'Not Found')
-	else:
+	published = g.db.published.find_one({'author': user, 'repo': repo})
+	if not published and 'access_token' not in session:
+		return error(403, 'Forbidden')
+	elif 'access_token' in session and session['user_info']['login'] != user:
 		return error(403, 'Forbidden')
 
+	if not g.storage.get_repo_exists(user, repo):
+		return error(404, 'Not Found')
+
+	gamedata, components = g.storage.get_game_files(user, repo)
+
+	return render_template(
+		'game/game.html', 
+		user=user,
+		repo=repo,
+		gamedata=gamedata, 
+		components=components
+	)
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=True);
