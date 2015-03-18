@@ -85,6 +85,6 @@ Components.register('mesh', MeshComponent, {
 	shape: {type: ['box', 'sphere', 'cylinder', 'plane'], default: 'box'},
 	castShadow: {type: 'bool', default: false},
 	receiveShadow: {type: 'bool', default: false},
-	materialType: {type: ['phong', 'lambert', 'basic'], default: 'lambert'},
+	materialType: {type: ['phong', 'lambert', 'basic'], default: 'phong'},
 	materialColour: {type: 'colour', default: 0xFFFFFF}
 });
