@@ -151,6 +151,9 @@ SceneView.prototype.setActiveScene = function(sid) {
 			sc.entities[i].update(0);
 		}
 	}
+	else {
+		Game.setActiveScene(null);
+	}
 
 	this.setSelection(null);
 }
