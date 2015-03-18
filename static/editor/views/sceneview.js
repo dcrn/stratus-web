@@ -95,6 +95,8 @@ SceneView.prototype.updateMovement = function() {
 }
 
 SceneView.prototype.onMouseDown = function(e) {
+	e.offsetX = e.offsetX || e.layerX;
+	e.offsetY = e.offsetY || e.layerY;
 	window.getSelection().removeAllRanges();
 
 	var handled = this.selection.onMouseDown(e.offsetX, e.offsetY);
@@ -109,6 +111,8 @@ SceneView.prototype.onMouseUp = function(e) {
 }
 
 SceneView.prototype.onMouseMove = function(e) {
+	e.offsetX = e.offsetX || e.layerX;
+	e.offsetY = e.offsetY || e.layerY;
 	this.selection.onMouseMove(e.offsetX, e.offsetY);
 	if (this.looking) {
 		var pos = new THREE.Vector2(e.offsetX, e.offsetY);

@@ -1,4 +1,4 @@
-var Components = Components || {
+var Components = {
 	comps: {},
 	properties: {}
 };
