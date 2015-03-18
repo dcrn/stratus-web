@@ -28,9 +28,7 @@ MeshComponent.prototype.getShape = function() {
 MeshComponent.prototype.setShape = function(s) {
 	this.shape = s;
 	
-	if (s == 'plane')
-		this.threeobj.geometry = new THREE.PlaneBufferGeometry(1, 1);
-	else if (s == 'sphere')
+	if (s == 'sphere')
 		this.threeobj.geometry = new THREE.SphereGeometry(0.5, 16, 16);
 	else if (s == 'cylinder')
 		this.threeobj.geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
@@ -82,7 +80,7 @@ MeshComponent.prototype.setReceiveShadow = function(b) {
 }
 
 Components.register('mesh', MeshComponent, {
-	shape: {type: ['box', 'sphere', 'cylinder', 'plane'], default: 'box'},
+	shape: {type: ['box', 'sphere', 'cylinder'], default: 'box'},
 	castShadow: {type: 'bool', default: false},
 	receiveShadow: {type: 'bool', default: false},
 	materialType: {type: ['phong', 'lambert', 'basic'], default: 'phong'},
