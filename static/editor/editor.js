@@ -240,7 +240,29 @@ Editor.newScene = function() {
 			val.ID = val.ID.trim();
 			if (val.ID === '') return;
 
-			self.gamedata.scenes[val.ID] = {entities:{}};
+			self.gamedata.scenes[val.ID] = {entities:{"default camera": {
+					"transform": {
+						"position": {
+							"type": "vector",
+							"parameters": [
+								0,
+								-46.72116875172894,
+								62.853930566438855
+							]
+						},
+						"rotation": {
+							"type": "quaternion",
+							"parameters": [
+								0.384808188808245,
+								0,
+								0,
+								0.9229965643631173
+							]
+						}
+					},
+					"camera": {}
+ 				}
+ 			}};
 			self.view.main.scene.addScene(val.ID);
 			self.view.explorer.scenes.addItem(null, null, 'scene', val.ID, {});
 
@@ -330,11 +352,11 @@ Editor.performAction = function(type, action) {
 
 			this.view.showModalInput({
 				title: 'Add Component',
-				inputs: {ComponentID: {type: 'text', value: ''}, Component: {type: Components.list(), value: ''}},
+				inputs: {ScriptComponentID: {type: 'text', value: ''}, 'OR':{type:'none', value:''}, ComponentList: {type: Components.list(), value: ''}},
 				callback: function(val) {
-					var comp = (val.ComponentID || '').trim();
+					var comp = (val.ScriptComponentID || '').trim();
 					if (!comp) {
-						comp = val.Component;
+						comp = val.ComponentList;
 					}
 
 					if (comp in ent) {
