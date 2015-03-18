@@ -10,7 +10,10 @@
 		<div class="panel panel-default project">
 			<div class="panel-heading">
 			<h1>{{game.repo}} <small>by {{game.author}}</small></h1>
-			<a class="btn btn-sm btn-primary" target="_blank" href="/game/{{game.author}}/{{game.repo}}"><span class="glyphicon glyphicon-play-circle"></span> Play</a>
+			<a class="btn btn-sm btn-success" target="_blank" href="/game/{{game.author}}/{{game.repo}}"><span class="glyphicon glyphicon-play-circle"></span> Play</a>
+			{% if 'access_token' in session %}
+			<a class="btn btn-sm btn-default" target="_blank" href="https://github.com/{{game.author}}/{{game.repo}}/fork"><span class="glyphicon glyphicon-duplicate"></span> Fork on GitHub</a>
+			{% endif %}
 			</div>
 		</div>
 		{% endfor %}
