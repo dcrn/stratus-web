@@ -133,7 +133,7 @@ SceneView.prototype.onMouseMove = function(e) {
 
 SceneView.prototype.setData = function(d) {
 	this.game = Game.load(d);
-	if (d.config && d.config.defaultSceneID) {
+	if (d.config && d.config.defaultSceneID && d.config.defaultSceneID in this.game) {
 		this.game[d.config.defaultSceneID].activate();
 	}
 	if (d.config && typeof d.config.clearColour != undefined) {

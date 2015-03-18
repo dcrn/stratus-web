@@ -90,7 +90,7 @@ Game.load = function(json) {
 			this.setClearColour(config.clearColour);
 		if ('pointerLockEnabled' in config)
 			this.setPointerLockEnabled(config.pointerLockEnabled);
-		if ('defaultSceneID' in config)
+		if ('defaultSceneID' in config && config.defaultSceneID in this.scenes)
 			this.scenes[config.defaultSceneID].activate();
 	}
 
