@@ -76,6 +76,7 @@ Editor.onClose = function() {
 	if (this.savetimer) {
 		clearTimeout(this.savetimer);
 		this.autoSave(true);
+		Editor.saveAllScripts();
 	}
 }
 
@@ -83,6 +84,7 @@ Editor.onBlur = function() {
 	if (this.savetimer) {
 		clearTimeout(this.savetimer);
 		this.autoSave();
+		Editor.saveAllScripts();
 	}
 }
 
@@ -94,6 +96,12 @@ Editor.autoSave = function(sync) {
 		url: window.location.pathname + 
 			'/gamedata.json'
 	});
+}
+
+Editor.saveAllScripts = function() {
+	for (var f in this.scriptviews) {
+		this.saveScript(f);
+	}
 }
 
 Editor.saveScript = function(filename) {
