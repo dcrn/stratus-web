@@ -79,7 +79,6 @@ def login():
 
 		# Get primary email
 		if status and len(emails) > 0:
-			print(emails)
 			primary = emails[0]['email']
 			for em in emails:
 				if em['primary']:
