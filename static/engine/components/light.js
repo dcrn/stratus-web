@@ -14,15 +14,17 @@ LightComponent.prototype.onComponentRemove = function(ent, com) {
 LightComponent.prototype.applyOptions = function(options) {
 	var ent = this.entity;
 	var oldtype = this.type;
-	
-	if (ent && options.type !== oldtype) {
+
+	if (ent && oldtype && options.type !== oldtype) {
 		ent.remove(this);
 	}
 
 	if (options.type !== oldtype) {
-		this.setIntensity(0.0);
-		this.setShadowDarkness(0.0);
-		this.setShadowCameraVisible(false);
+		if (oldtype) {
+			this.setIntensity(0.0);
+			this.setShadowDarkness(0.0);
+			this.setShadowCameraVisible(false);
+		}
 
 		this.type = options.type;
 		if (options.type == 'ambient')
@@ -35,7 +37,7 @@ LightComponent.prototype.applyOptions = function(options) {
 			this.threeobj = new THREE.PointLight();
 	}
 
-	if (ent && options.type !== oldtype) {
+	if (ent && oldtype && options.type !== oldtype) {
 		ent.add(this);
 	}
 
