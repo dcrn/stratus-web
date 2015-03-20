@@ -21,7 +21,7 @@ FPSControllerComponent = function() {
 
 	this.physics = Components.create('physics', {
 		shape: 'cylinder',
-		mass: 200,
+		mass: 100,
 		angularDamping: 10000,
 		friction: 0.9,
 		damping: 0.0
