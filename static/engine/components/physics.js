@@ -24,6 +24,7 @@ PhysicsComponent.prototype.applyOptions = function(options) {
 		)
 	);
 
+	this.setMass(options.mass);
 	this.setFriction(options.friction);
 	this.setDamping(options.damping);
 	this.setAngularDamping(options.angularDamping);
