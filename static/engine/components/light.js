@@ -12,23 +12,30 @@ LightComponent.prototype.onComponentRemove = function(ent, com) {
 }
 
 LightComponent.prototype.applyOptions = function(options) {
-	var ent;
-	if (this.entity) {
-		ent = this.entity;
+	var ent = this.entity;
+	var oldtype = this.type;
+	
+	if (ent && options.type !== oldtype) {
 		ent.remove(this);
 	}
 
-	this.type = options.type;
-	if (options.type == 'ambient')
-		this.threeobj = new THREE.AmbientLight();
-	else if (options.type == 'spotlight')
-		this.threeobj = new THREE.SpotLight();
-	else if (options.type == 'directional')
-		this.threeobj = new THREE.DirectionalLight();
-	else
-		this.threeobj = new THREE.PointLight();
+	if (options.type !== oldtype) {
+		this.setIntensity(0.0);
+		this.setShadowDarkness(0.0);
+		this.setShadowCameraVisible(false);
 
-	if (ent) {
+		this.type = options.type;
+		if (options.type == 'ambient')
+			this.threeobj = new THREE.AmbientLight();
+		else if (options.type == 'spotlight')
+			this.threeobj = new THREE.SpotLight();
+		else if (options.type == 'directional')
+			this.threeobj = new THREE.DirectionalLight();
+		else
+			this.threeobj = new THREE.PointLight();
+	}
+
+	if (ent && options.type !== oldtype) {
 		ent.add(this);
 	}
 
