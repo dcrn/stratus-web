@@ -7,6 +7,8 @@ import time, json, jinja2
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
 
+Compress(app)
+
 def error(code, msg):
 	return (render_template('web/error.html', error={'code': code, 'message': msg}), code)
 
@@ -50,7 +52,7 @@ def before_req():
 @app.route('/')
 def index():
 	return render_template('web/index.html',
-		latest=list(g.db.published.find(limit=5, sort=[('timestamp', 1)]))
+		latest=list(g.db.published.find(limit=5, sort=[('timestamp', -1)]))
 	)
   
 @app.route('/login', methods=['GET', 'POST'])
@@ -99,7 +101,7 @@ def logout():
 @app.route('/games')
 def games():
 	return render_template('web/games.html', 
-		latest=list(g.db.published.find(sort=[('timestamp', 1)]))
+		latest=list(g.db.published.find(sort=[('timestamp', -1)]))
 	)
 
 @app.route('/dashboard')
