@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect, url_for, jsonify, render_template, session, g
+from flask.ext.compress import Compress
 from github import GitHub
 from storage import Storage
 from pymongo import MongoClient
