@@ -144,7 +144,9 @@ def publish(repo):
 
 	user = session['user_info']['login']
 	if not g.storage.get_repo_exists(user, repo):
-		return error(404, 'Not Found')
+		return redirect(url_for('dashboard', 
+			alert="Unable to publish, no such repository", 
+			alert_type="danger"))
 
 	curr = g.db.published.find_one({'author': user, 'repo': repo})
 
@@ -171,7 +173,9 @@ def commit(repo):
 
 	user = session['user_info']['login']
 	if not g.storage.get_repo_exists(user, repo):
-		return error(404, 'Not Found')
+		return redirect(url_for('dashboard', 
+			alert="Unable to commit, no such repository", 
+			alert_type="danger"))
 
 	name = session['user_info']['name'] or ''
 	email = session['user_info']['email'] or ''
@@ -243,8 +247,9 @@ def delete(repo):
 
 	user = session['user_info']['login']
 	if not g.storage.get_repo_exists(user, repo):
-		return error(404, 'Not Found')
-
+		return redirect(url_for('dashboard', 
+			alert="Unable to delete, no such repository", 
+			alert_type="danger"))
 
 	published = g.db.published.find_one({'author': user, 'repo': repo})
 	if (published):
@@ -269,7 +274,9 @@ def clone(repo):
 	access_token = session['access_token']
 	user = session['user_info']['login']
 	if g.storage.get_repo_exists(user, repo):
-		return error(409, 'Conflict')
+		return redirect(url_for('dashboard', 
+			alert="Unable to clone, repository already exists", 
+			alert_type="danger"))
 
 	stat = g.storage.init_repo(user, repo, access_token)
 	if stat is False: 
@@ -294,7 +301,9 @@ def push(repo):
 
 	user = session['user_info']['login']
 	if not g.storage.get_repo_exists(user, repo):
-		return error(404, 'Not Found')
+		return redirect(url_for('dashboard', 
+			alert="Unable to push, no such repository", 
+			alert_type="danger"))
 
 	if not g.storage.push_repo(user, repo):
 		return redirect(url_for('dashboard', 
@@ -312,7 +321,9 @@ def pull(repo):
 
 	user = session['user_info']['login']
 	if not g.storage.get_repo_exists(user, repo):
-		return error(404, 'Not Found')
+		return redirect(url_for('dashboard', 
+			alert="Unable to pull, no such repository", 
+			alert_type="danger"))
 
 	if not g.storage.pull_repo(user, repo):
 		return redirect(url_for('dashboard', 
