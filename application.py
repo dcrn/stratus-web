@@ -102,7 +102,7 @@ def logout():
 @app.route('/games')
 def games():
 	return render_template('web/games.html', 
-		latest=list(g.db.published.find(sort=[('timestamp', -1)]))
+		latest=list(g.db.published.find(sort=[('author', 1), ('repo', 1)]))
 	)
 
 @app.route('/dashboard')
