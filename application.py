@@ -327,7 +327,7 @@ def pull(repo):
 
 	if not g.storage.pull_repo(user, repo):
 		return redirect(url_for('dashboard', 
-			alert="Unable to pull to remote", 
+			alert="Unable to pull from remote", 
 			alert_type="danger"))
 
 	return redirect(url_for('dashboard', 
