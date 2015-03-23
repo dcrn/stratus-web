@@ -175,7 +175,7 @@ def commit(repo):
 
 	name = session['user_info']['name'] or ''
 	email = session['user_info']['email'] or ''
-	msg = request.form.get('message')
+	msg = request.form.get('message', '')
 
 	stat = g.storage.get_repo_status(user, repo)
 
@@ -207,7 +207,9 @@ def init(repo):
 	access_token = session['access_token']
 	user = session['user_info']['login']
 	if g.storage.get_repo_exists(user, repo):
-		return error(409, 'Conflict')
+		return redirect(url_for('dashboard', 
+			alert="Unable to create repository as it already exists", 
+			alert_type="danger"))
 
 	# Init on github and on storage
 	stat = g.github.init_repo(repo, access_token)
