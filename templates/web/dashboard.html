@@ -1,7 +1,7 @@
 {% set page='Dashboard' %}
 {% extends 'web/base.html' %}
 {% block content %}
-	<div class="notifications">
+	<div class="notifications container">
 		{% if request.args.alert %}
 			<div class="alert alert-{{request.args.alert_type}}">
 				{% if request.args.alert_type == 'danger' %}
