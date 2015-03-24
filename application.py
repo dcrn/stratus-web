@@ -307,7 +307,7 @@ def push(repo):
 
 	if not g.storage.push_repo(user, repo):
 		return redirect(url_for('dashboard', 
-			alert="Unable to push to remote", 
+			alert="Unable to push to remote. It may be ahead of the local repository, try pulling first.", 
 			alert_type="danger"))
 
 	return redirect(url_for('dashboard', 

@@ -28,30 +28,10 @@
 
 	{# Load all views + templates #}
 	{% set views = [
-			'containerview',
-			'editorview',
-			'explorerscenesitemview',
-			'explorerscenesview',
-			'explorerscriptsitemview',
-			'explorerscriptsview',
-			'explorerview',
-			'mainview',
-			'modalinputview',
-			'propertiesview',
-			'sceneview',
-			'scriptview',
-			'tabitemview',
-			'tabpanelview',
-			'tabview'
+		'containerview', 'editorview', 'explorerscenesitemview', 'explorerscenesview', 'explorerscriptsitemview', 'explorerscriptsview', 'explorerview', 'mainview', 'modalinputview', 'propertiesview', 'sceneview', 'scriptview', 'tabitemview', 'tabpanelview', 'tabview'
 	] %}
 	{% set templates = [
-			'explorerscenesitemview',
-			'explorerscriptsitemview',
-			'modalinputview',
-			'propertiesview',
-			'tabitemview',
-			'tabpanelview',
-			'tabview'
+		'explorerscenesitemview', 'explorerscriptsitemview', 'modalinputview', 'propertiesview', 'tabitemview', 'tabpanelview', 'tabview'
 	] %}
 	{% for v in views %}
 	<script src="{{url_for('static', filename='editor/views/'+v+'.js')}}"></script>
