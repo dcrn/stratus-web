@@ -65,9 +65,9 @@
 	<div id="initmodal" class="modal fade">
 		<div class="modal-dialog modal-content">
 			<div class="modal-header">
-				<h3>
+				<h4>
 					Create New Repository
-				</h3>
+				</h4>
 			</div>
 			<div class="modal-body">
 				Repository name:<br />
@@ -84,7 +84,7 @@
 	<div id="commitmodal" class="modal fade">
 		<div class="modal-dialog modal-content">
 			<div class="modal-header">
-				<h3>Commit Changes to Repository</h3>
+				<h4>Commit Changes to Repository</h4>
 			</div>
 			<form method="post" action="/dashboard/commit/">
 				<div class="modal-body">
@@ -102,7 +102,7 @@
 	<div id="deletemodal" class="modal fade">
 		<div class="modal-dialog modal-content">
 			<div class="modal-header">
-				<h3>Delete repo <span id="deletereponame"></span>?</h3>
+				<h4>Delete repo <span id="deletereponame"></span>?</h4>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default cancelbutton">Cancel</button>
@@ -114,9 +114,9 @@
 	<div id="clonemodal" class="modal fade">
 		<div class="modal-dialog modal-content">
 			<div class="modal-header">
-				<h3>
+				<h4>
 					Clone From GitHub
-				</h3>
+				</h4>
 			</div>
 			<div class="modal-body">
 				<ul class="list-group">
@@ -131,6 +131,7 @@
 			</div>
 		</div>
 	</div>
+
 {% endblock %}
 {% block scripts %}
 	<script>
