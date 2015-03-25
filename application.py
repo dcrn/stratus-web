@@ -8,7 +8,7 @@ import time, json, jinja2
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
 
-Compress(app)
+#Compress(app)
 
 def error(code, msg):
 	return (render_template('web/error.html', error={'code': code, 'message': msg}), code)
