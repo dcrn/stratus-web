@@ -1,5 +1,11 @@
+/*
+ This component is responsible for providing entities with a position, rotation and scale.
+*/
+
 TransformComponent = function(options) {
 	this.sub = null;
+
+	// Initialise a new Object3D which has it's own position, rotation and scale properties.
 	this.threeobj = new THREE.Object3D();
 
 	this.applyOptions(options);
@@ -18,18 +24,25 @@ TransformComponent.prototype.applyTransform = function() {
 }
 
 TransformComponent.prototype.subscribe = function(comp) {
+	/* When a component is subscribed to, the get and set methods on
+		the transform component will be redirected to that instead.
+	*/
 	if (!comp.getPosition || !comp.setPosition || 
 		!comp.getRotation || !comp.setRotation || 
 		!comp.getScale || !comp.setScale)
 		return false;
 
+	// Don't subscribe if in the editor
 	if (window['Editor'] !== undefined) return false;
 
 	this.sub = comp;
+
+	// Apply the formerly set position, rotation and scale to the newly subscribed component.
 	this.applyTransform();
 }
 
 TransformComponent.prototype.update = function(dt) {
+	// If subscribed, then update the object3d every frame to provide lights with a correctly updating target.
 	if (this.sub) {
 		this.threeobj.position.copy(this.getPosition());
 		this.threeobj.quaternion.copy(this.getRotation());

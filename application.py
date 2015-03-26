@@ -6,23 +6,28 @@ from pymongo import MongoClient
 import time, json, jinja2
 
 app = Flask(__name__)
+
+# Load config
 app.config.from_pyfile('config.cfg')
 
+# Begin compressing requests on this application using Flask-Compress
 Compress(app)
 
 def error(code, msg):
+	# Return an error code if something went wrong.
 	return (render_template('web/error.html', error={'code': code, 'message': msg}), code)
 
 # Catch all requests
 @app.after_request
 def after_req(resp):
+	# Update the user's last visit timestamp
 	if 'access_token' in session:
 		session['last_visit'] = time.time()
 	return resp
 
 @app.before_request
 def before_req():
-	# Set up GitHub API
+	# Set up GitHub API object
 	g.github = GitHub(
 		app.config.get('GITHUB_CLIENT_ID'),
 		app.config.get('GITHUB_CLIENT_SECRET'),
@@ -39,11 +44,12 @@ def before_req():
 		app.config.get('STORAGE_PORT')
 	)
 
+	# Check if the user's access token has 'expired'
 	if ('access_token' in session and
 		(time.time() - session.get('last_visit', 0)) > 
 		app.config.get('ACCESS_TOKEN_UPDATE_TIME')):
 
-		# Validate the user's access token
+		# Validate the user's access token on GitHub
 		status, resuser = g.github.get_user(session.get('access_token'))
 		if status: 	# Update user details
 			session['user_info'] = resuser
@@ -52,72 +58,83 @@ def before_req():
 
 @app.route('/')
 def index():
+	# Render the homepage with a list of the 5 most recently published games
 	return render_template('web/index.html',
 		latest=list(g.db.published.find(limit=5, sort=[('timestamp', -1)]))
 	)
   
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+	# Make sure a code was passed in from GitHub OAuth
 	code = request.args.get('code')
 	if code is None:
 		return error(403, 'Forbidden')
-	else:
-		status, restoken = g.github.get_access_token(code)
+	
 
-		if not status:
-			return error(500, 'Internal Server Error')
-		if 'access_token' not in restoken:
-			return error(401, 'Unauthorized')
+	# Get the user's access token from GitHub using the code
+	status, restoken = g.github.get_access_token(code)
 
-		status, resuser = g.github.get_user(restoken['access_token'])
-		if not status:
-			return error(500, 'Internal Server Error')
+	if not status:
+		return error(500, 'Internal Server Error')
+	if 'access_token' not in restoken:
+		return error(401, 'Unauthorized')
 
-		# Set up session variables
-		session['access_token'] = restoken['access_token']
-		session['user_info'] = resuser
+	# Retrieve user details using the new access token
+	status, resuser = g.github.get_user(restoken['access_token'])
+	if not status:
+		return error(500, 'Internal Server Error')
 
-		# Get the user's email addresses
-		status, emails = g.github.get_user_emails(session['access_token'])
+	# Store the user's access token and information in their session
+	session['access_token'] = restoken['access_token']
+	session['user_info'] = resuser
 
-		# Get primary email
-		if status and len(emails) > 0:
-			primary = emails[0]['email']
-			for em in emails:
-				if em['primary']:
-					session['user_info']['email'] = em['email']
+	# Get the user's email addresses
+	status, emails = g.github.get_user_emails(session['access_token'])
 
-		# Get a list of repos on github
-		status, repos = g.github.list_repos(session['access_token'])
-		if status:
-			session['user_repos'] = [x['name'] for x in repos]
+	# Get the user's primary email address and store it in the session
+	if status and len(emails) > 0:
+		for em in emails:
+			if em['primary']:
+				session['user_info']['email'] = em['email']
+				break
+
+	# Get and store a list of the user's repositories on GitHub in the session
+	status, repos = g.github.list_repos(session['access_token'])
+	if status:
+		session['user_repos'] = [x['name'] for x in repos]
 
 	return redirect(url_for('dashboard'))
 
 @app.route('/logout')
 def logout():
+	# Clear the session to log out, then redirect back to the home page.
 	session.clear()
 	return redirect(url_for('index'))
 
 @app.route('/games')
 def games():
+	# Render the games template using a list of published games from MongoDB
+	# Sorted by author and repository names
 	return render_template('web/games.html', 
 		latest=list(g.db.published.find(sort=[('author', 1), ('repo', 1)]))
 	)
 
 @app.route('/dashboard')
 def dashboard():
+	# Ensure the user is logged in
 	if 'access_token' not in session:
 		return error(403, 'Forbidden')
 
+	# Get the username and list of repositories on the storage server
 	user = session['user_info']['login']
 	repos = g.storage.get_repo_list(user)
 
+	# Get a list of published repositories by this user
 	published = {}
 	for doc in g.db.published.find({'author': user}):
 		published[doc['repo']] = True
 
-	# Get status for each repo
+	# Get status for each repo (true = uncommitted changes, false = no changes)
 	status = {}
 	for r in repos:
 		stat = g.storage.get_repo_status(user, r)
@@ -132,6 +149,7 @@ def dashboard():
 			else:
 				status[r] = False
 
+	# Render the template, passing in the repository information to display to the user.
 	return render_template('web/dashboard.html', 
 		repos=repos,
 		status=status,
@@ -148,14 +166,17 @@ def publish(repo):
 			alert="Unable to publish, no such repository", 
 			alert_type="danger"))
 
+	# Check if the repository has already been published
 	curr = g.db.published.find_one({'author': user, 'repo': repo})
 
+	# If it has, remove it from the database
 	if (curr):
 		g.db.published.remove({'author': user, 'repo': repo}, multi=False)
 		return redirect(url_for('dashboard', 
 			alert="Repo unpublished", 
 			alert_type="success"))
 	else:
+		# Otherwise add it to the database.
 		g.db.published.insert({
 			'author': user,
 			'repo': repo,
@@ -177,15 +198,19 @@ def commit(repo):
 			alert="Unable to commit, no such repository", 
 			alert_type="danger"))
 
+	# Get the user's name and email address for the commit
 	name = session['user_info']['name'] or ''
 	email = session['user_info']['email'] or ''
+
+	# Message passed in from the form on the dashboard
 	msg = request.form.get('message', '')
 
+	# Get a list of modified, removed, untracked files in the repo
 	stat = g.storage.get_repo_status(user, repo)
 
-	# Make commit list from modified/removed/untracked files
+	# Make commit object from modified/removed/untracked files
 	commit = {'A': [], 'R': [], 'msg': msg, 'name': name, 'email': email}
-	commit['A'] += stat['U']
+	commit['A'] += stat['U'] # Add all untracked files
 	if 'M' in stat:
 		for f in stat['M']:
 			commit['A'].append(f['A'])
@@ -193,6 +218,7 @@ def commit(repo):
 		for f in stat['D']:
 			commit['R'].append(f['A'])
 	
+	# Create commit if possible
 	status = g.storage.commit_repo(user, repo, commit)
 	if status is False:
 		return redirect(url_for('dashboard', 
@@ -215,13 +241,14 @@ def init(repo):
 			alert="Unable to create repository as it already exists", 
 			alert_type="danger"))
 
-	# Init on github and on storage
+	# Init a new repository remotely via the GitHub API
 	stat = g.github.init_repo(repo, access_token)
 	if stat is False: 
 		return redirect(url_for('dashboard', 
 			alert="Unable to create remote repository on GitHub", 
 			alert_type="danger"))
 
+	# Init a new repo on the storage server, passing in the access token
 	stat = g.storage.init_repo(user, repo, access_token)
 	if stat is False: 
 		return redirect(url_for('dashboard', 
@@ -233,9 +260,10 @@ def init(repo):
 	if status:
 		session['user_repos'] = [x['name'] for x in repos]
 
-	# init gamedata.json
+	# Create gamedata.json on the new repo
 	g.storage.set_file(user, repo, 'gamedata.json', '{}')
 
+	# Alert the user the action was successful
 	return redirect(url_for('dashboard', 
 		alert="Repository initialized locally and remotely", 
 		alert_type="success"))
@@ -251,10 +279,12 @@ def delete(repo):
 			alert="Unable to delete, no such repository", 
 			alert_type="danger"))
 
+	# Check if the game is currently published, if it is then remove the published entry from the database
 	published = g.db.published.find_one({'author': user, 'repo': repo})
 	if (published):
 		g.db.published.remove({'author': user, 'repo': repo}, multi=False)
 
+	# Instruct the storage server to delete the repository and it's contents
 	stat = g.storage.delete_repo(user, repo)
 
 	if stat is False:
@@ -278,12 +308,14 @@ def clone(repo):
 			alert="Unable to clone, repository already exists", 
 			alert_type="danger"))
 
+	# Init a repo on the storage server, using the same name as the remote we want to clone
 	stat = g.storage.init_repo(user, repo, access_token)
 	if stat is False: 
 		redirect(url_for('dashboard', 
 			alert="Unable to init repository", 
 			alert_type="danger"))
 
+	# Pull the remote repository onto the storage server
 	stat = g.storage.pull_repo(user, repo)
 	if stat is False:
 		redirect(url_for('dashboard', 
@@ -305,6 +337,7 @@ def push(repo):
 			alert="Unable to push, no such repository", 
 			alert_type="danger"))
 
+	# Push using the storage API
 	if not g.storage.push_repo(user, repo):
 		return redirect(url_for('dashboard', 
 			alert="Unable to push to remote. It may be ahead of the local repository, try pulling first.", 
@@ -325,6 +358,7 @@ def pull(repo):
 			alert="Unable to pull, no such repository", 
 			alert_type="danger"))
 
+	# Pull using the storage API
 	if not g.storage.pull_repo(user, repo):
 		return redirect(url_for('dashboard', 
 			alert="Unable to pull from remote", 
@@ -343,9 +377,11 @@ def editor(repo):
 	if not g.storage.get_repo_exists(user, repo):
 		return error(404, 'Not Found')
 	
+	# Get the contents of gamedata.json file and all component scripts
 	gamedata, components = g.storage.get_game_files(user, repo)
 	tree = g.storage.get_tree(user, repo)
 
+	# Render the gamedata and components in the editor template
 	return render_template(
 		'editor/editor.html', 
 		gamedata=gamedata, 
@@ -379,16 +415,20 @@ def file(repo, file):
 
 @app.route('/game/<user>/<repo>')
 def game(user, repo):
+	# Check if the game is published. If it is, anyone can view it.
 	published = g.db.published.find_one({'author': user, 'repo': repo})
 
+	# If the game isn't published, only the author can view it.
 	if not (published or 'access_token' in session and session['user_info']['login'] == user):
 		return error(403, 'Forbidden')
 
 	if not g.storage.get_repo_exists(user, repo):
 		return error(404, 'Not Found')
 
+	# Get the contents of gamedata.json file and all component scripts
 	gamedata, components = g.storage.get_game_files(user, repo)
 
+	# Render the game template with the gamedata JSON and each component script
 	return render_template(
 		'game/game.html', 
 		user=user,

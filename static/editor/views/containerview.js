@@ -1,3 +1,7 @@
+/*
+ The container view is just a div tag that can have a number of child views
+ appended to it upon rendering.
+*/
 ContainerView = function() {
 	this.$el = $('<div>');
 	this.views = [];

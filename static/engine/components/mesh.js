@@ -1,4 +1,10 @@
+/*
+ This is a wrapper around the Three.js Mesh class, which also implements
+ the Geometry classes for setting the shape of the mesh, and the Material classes.
+*/
+
 MeshComponent = function(options) {
+	// Create the Three.js Mesh object
 	this.threeobj = new THREE.Mesh();
 	this.threeobj.up.set(0, 0, 1);
 	this.applyOptions(options);
@@ -28,6 +34,9 @@ MeshComponent.prototype.getShape = function() {
 MeshComponent.prototype.setShape = function(s) {
 	this.shape = s;
 	
+	// Create the specific geometry for the specified shape,
+	// Setting it on the mesh object as the .geometry property
+	// Each geometry is set to a 1x1x1 size, so the scale controls the size of this.
 	if (s == 'sphere')
 		this.threeobj.geometry = new THREE.SphereGeometry(0.5, 16, 16);
 	else if (s == 'cylinder')
@@ -43,13 +52,14 @@ MeshComponent.prototype.getMaterialType = function() {
 MeshComponent.prototype.setMaterialType = function(t) {
 	this._materialType = t;
 
+	// Create the material type specified
 	if (t == 'phong')
 		this.threeobj.material = new THREE.MeshPhongMaterial();
 	else if (t == 'lambert')
 		this.threeobj.material = new THREE.MeshLambertMaterial();
 	else if (t == 'basic')
 		this.threeobj.material = new THREE.MeshBasicMaterial();
-
+	
 	if (this._materialColour)
 		this.threeobj.material.color.setHex(this._materialColour);
 }

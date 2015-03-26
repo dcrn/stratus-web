@@ -1,8 +1,16 @@
+/*
+ This component is a wrapper around the Ammo.js btRigidBody class.
+ The methods implemented convert any vectors or quaternions passed into 
+ 	the correct format for usage with Ammo.js.
+*/
+
 PhysicsComponent = function(options) {
 	this.applyOptions(options);
 }
 
 PhysicsComponent.prototype.applyOptions = function(options) {
+	// Create the collision 'shape'
+
 	if (options.shape == 'sphere')
 		this.shape = new Ammo.btSphereShape(0.5);
 	else if (options.shape == 'cylinder')
@@ -13,9 +21,11 @@ PhysicsComponent.prototype.applyOptions = function(options) {
 	this._scale = new Vector3(1, 1, 1);
 	this._mass = options.mass;
 
+	// Calculate the inertia vector from the mass
 	this._inertia = new Ammo.btVector3();
 	this.shape.calculateLocalInertia(this._mass, this._inertia);
 
+	// Create the new rigid body from the interia, shape and mass.
 	this.ammoobj = new Ammo.btRigidBody(
 		new Ammo.btRigidBodyConstructionInfo(this._mass,
 			new Ammo.btDefaultMotionState(),
@@ -24,6 +34,7 @@ PhysicsComponent.prototype.applyOptions = function(options) {
 		)
 	);
 
+	// Set any other properties passed in with the options.
 	this.setMass(options.mass);
 	this.setFriction(options.friction);
 	this.setDamping(options.damping);
@@ -32,12 +43,18 @@ PhysicsComponent.prototype.applyOptions = function(options) {
 }
 
 PhysicsComponent.prototype.onComponentAdded = function(ent, com) {
+	/* When this component is added to an entity with a transform component
+		Or a transform component is added to this component's parent entity,
+		Set the transform component to subscribe to this component, which will make
+	 	everything else on the entity follow the position and rotation of the physics object. */
+
 	if (com.id === 'transform' || (com === this && this.entity.has('transform')))
 		this.entity.get('transform').subscribe(this);
 }
 
 // Methods
 PhysicsComponent.prototype.bt2three = function(i) {
+	// Convert Ammo.js vectors and quaternions into the Three.js vector and quaternion format.
 	if (i instanceof Ammo.btVector3)
 		return new Vector3(i.x(), i.y(), i.z());
 	else if (i instanceof Ammo.btQuaternion)
@@ -47,6 +64,7 @@ PhysicsComponent.prototype.bt2three = function(i) {
 }
 
 PhysicsComponent.prototype.three2bt = function(i) {
+	// Convert Three.js vectors and quaternions to Ammo.js vectors and quaternions.
 	if (i instanceof Vector3)
 		return new Ammo.btVector3(i.x, i.y, i.z);
 	else if (i instanceof Quaternion)
@@ -56,6 +74,7 @@ PhysicsComponent.prototype.three2bt = function(i) {
 }
 
 PhysicsComponent.prototype.activate = function() {
+	// Activating a physics component wakes it up from sleeping.
 	this.ammoobj.activate();
 }
 

@@ -1,3 +1,8 @@
+/*
+ Wrapper around the Three.js AmbientLight, SpotLight, DirectionalLight and PointLight classes
+ Requires some special manipulation to be able to be added and removed in real time.
+*/
+
 LightComponent = function(options) {
 	this.target = null;
 
@@ -15,17 +20,20 @@ LightComponent.prototype.applyOptions = function(options) {
 	var ent = this.entity;
 	var oldtype = this.type;
 
+	// If changing light type, then remove it from the owner entity first
 	if (ent && oldtype && options.type !== oldtype) {
 		ent.remove(this);
 	}
 
 	if (options.type !== oldtype) {
 		if (oldtype) {
+			// If a light previously existed, make this one no longer visible
 			this.setIntensity(0.0);
 			this.setShadowDarkness(0.0);
 			this.setShadowCameraVisible(false);
 		}
 
+		// Create the specific Three.js light class depending on the type
 		this.type = options.type;
 		if (options.type == 'ambient')
 			this.threeobj = new THREE.AmbientLight();
@@ -37,6 +45,7 @@ LightComponent.prototype.applyOptions = function(options) {
 			this.threeobj = new THREE.PointLight();
 	}
 
+	// Add this component back onto the parent entity after updating the light type
 	if (ent && oldtype && options.type !== oldtype) {
 		ent.add(this);
 	}
@@ -50,6 +59,7 @@ LightComponent.prototype.applyOptions = function(options) {
 	this.setAngle(options.angle);
 	this.setExponent(options.exponent);
 
+	// If the light type is ambient or point, then ignore any shadow settings.
 	if (this.type == 'ambient' || this.type == 'point') {
 		return;
 	}
@@ -68,6 +78,7 @@ LightComponent.prototype.applyOptions = function(options) {
 }
 
 LightComponent.prototype.setTarget = function (eid) {
+	// Set the light to point at a specific entity
 	if (this.entity && eid in this.entity.scene.entities) {
 		this.target = this.entity.scene.entities[eid];
 		this.threeobj.target = this.target.get('transform').threeobj;
@@ -76,6 +87,8 @@ LightComponent.prototype.setTarget = function (eid) {
 
 LightComponent.prototype.update = function (dt) {
 	if (this.targetEntID) {
+		// If a target entity ID was set in the options, set the target on the first update.
+		// This is performed in update to make sure other entities exist.
 		this.setTarget(this.targetEntID);
 		delete this.targetEntID;
 	}
@@ -83,6 +96,7 @@ LightComponent.prototype.update = function (dt) {
 	if (!this.entity.has('transform')) return;
 	var transform = this.entity.get('transform');
 
+	// Copy position of the transform component
 	this.threeobj.position.copy(transform.getPosition());
 	this.threeobj.quaternion.copy(transform.getRotation());
 }

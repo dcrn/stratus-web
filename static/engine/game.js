@@ -1,3 +1,7 @@
+/*
+ The Game object is responsible for loading, initialising and starting the game
+*/
+
 var Game = Game || {
 	scenes: {},
 	activeCamera: null,
@@ -6,10 +10,12 @@ var Game = Game || {
 	pointerlock: false
 }
 
+// Alias the most commonly used Three.js objects to a shorter version
 Vector3 = THREE.Vector3;
 Quaternion = THREE.Quaternion;
 
 Game.init = function() {
+	// Create a new Three.js renderer object which uses WebGL
 	this.renderer = new THREE.WebGLRenderer({antialias: true});
 	this.renderer.setSize(window.innerWidth, window.innerHeight);
 	this.aspectRatio = window.innerWidth / window.innerHeight;
@@ -17,18 +23,24 @@ Game.init = function() {
 }
 
 Game.loadScene = function(json) {
+	// Load a scene from a scene json object
 	var opt = {}, scene, ent;
 
+	// Copy config data from the object
 	if(json.config) {
 		for (x in json.config) {
 			opt[x] = json.config[x];
 		}
 	}
 
+	// Make the scene
 	scene = new Scene(opt);
+
+	// For each entity in the json object's entities entry, load that entity using Game.loadEntity.
 	for (entid in json.entities) {
 		ent = this.loadEntity(json.entities[entid]);
 
+		// Add the loaded entity into the scene
 		scene.add(
 			entid, 
 			ent
@@ -39,8 +51,10 @@ Game.loadScene = function(json) {
 }
 
 Game.loadEntity = function(json) {
+	// Load an entity from the serialised JSON format
 	var entity = new Entity(), opt, com;
 
+	// Create each component and add it to the entity
 	for (comid in json) {
 		com = Components.create(comid, json[comid]);
 		entity.add(com);
@@ -50,8 +64,10 @@ Game.loadEntity = function(json) {
 }
 
 Game.load = function(json) {
+	// Load a full game from the passed in JSON
 	var scn, scid, opt, entid, ent, compid, com;
 
+	// Load each scene in the json.scenes object
 	this.scenes = {};
 	if (json.scenes) {
 		for (scid in json.scenes) {
@@ -59,6 +75,8 @@ Game.load = function(json) {
 		}
 	}
 
+	// Get the first scene available and activate it, to make sure there's always a starting scene
+	// at the beginning of each game, even if no default scene is specified.
 	var sceneids = Object.keys(this.scenes);
 	if (sceneids.length > 0) {
 		this.scenes[sceneids[0]].activate();
@@ -68,6 +86,7 @@ Game.load = function(json) {
 	if (json.config && this.renderer) {
 		var config = json.config;
 
+		// Load each config setting and call the related setter on the Game object
 		if ('shadowMapEnabled' in config)
 			this.setShadowMapEnabled(config.shadowMapEnabled);
 		if ('shadowMapType' in config)
@@ -90,6 +109,8 @@ Game.load = function(json) {
 			this.setClearColour(config.clearColour);
 		if ('pointerLockEnabled' in config)
 			this.setPointerLockEnabled(config.pointerLockEnabled);
+
+		// Activate the 'defaultscene' from the config if it exists
 		if ('defaultSceneID' in config && config.defaultSceneID in this.scenes)
 			this.scenes[config.defaultSceneID].activate();
 	}
@@ -98,29 +119,38 @@ Game.load = function(json) {
 }
 
 Game.start = function() {
+	// Begin running the game
 	var self = this;
 
+	// If there's no active scene at this point, find one and activate it.
 	if (!this.getActiveScene()) {
 		var k = Object.keys(this.scenes);
 		if (k.length > 0)
 			this.scenes[k[0]].activate();
 	}
 
+	// Start the update method, which runs every frame
 	this.lasttime = 0;
 	function update(now) {
+		// Make sure the next frame will call this function
 		requestAnimationFrame(update);
+
+		// Find out the time between frames
 		var dt = (now - self.lasttime) / 1000;
 		self.lasttime = now;
 
+		// Update the active scene (if any)
 		if (self.activeScene)
 			self.activeScene.update(dt);
 
+		// Render the active scene with the active camera on the Threejs renderer object.
 		if (self.activeScene && self.activeCamera)
 			self.renderer.render(
 				self.activeScene.threeobj, 
 				self.activeCamera.threeobj
 			);
 	}
+	// Call the update function on the next frame
 	requestAnimationFrame(update);
 
 	// Pointer lock
@@ -134,6 +164,7 @@ Game.start = function() {
 		self.renderer.setSize(window.innerWidth, window.innerHeight);
 		self.aspectRatio = window.innerWidth / window.innerHeight;
 
+		// Change the camera's aspect ratio accordingly.
 		if (self.activeCamera)
 			self.activeCamera.setAspectRatio(self.aspectRatio);
 	});
@@ -152,6 +183,7 @@ Game.getActiveScene = function(s) {
 }
 
 Game.setActiveCamera = function(c) {
+	// Set the camera's aspect ratio before activating it
 	c.setAspectRatio(this.aspectRatio);
 	this.activeCamera = c;
 }
@@ -246,17 +278,23 @@ Game.getPointerLockEnabled = function() {
 }
 
 Game.setPointerLockEnabled = function(b) {
+	// Set the usage of the pointerlock API
+
 	if (!b) {
 		this.pointerlock = false;
 		return;
 	}
 
+	// Get the canvas element for the renderer
 	var can = this.renderer.domElement;
+	// Get the pointer lock API method
+	// This is different for each browser that implements it, so just try them all.
 	var pl = can.requestPointerLock ||
 			can.mozRequestPointerLock ||
 			can.webkitRequestPointerLock;
 	
 	if (pl) {
+		// Store the pointerlock method for when the user clicks on the game
 		pl = pl.bind(can);
 		this.pointerlock = pl;
 	}
@@ -265,6 +303,7 @@ Game.setPointerLockEnabled = function(b) {
 	}
 }
 
+// Game settings
 Game.properties = {
 	shadowMapEnabled: {type: 'bool', default: true},
 	shadowMapType: {type: ['PCFSoftShadowMap', 'PCFShadowMap', 'BasicShadowMap'], default: 'PCFShadowMap'},

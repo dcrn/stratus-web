@@ -1,3 +1,8 @@
+/*
+ Wrapper around the Three.js PerspectiveCamera class, which automatically
+ 	updates the camera's projection matrix when a camera property is changed (fov, near, far, etc).
+*/
+
 CameraComponent = function(options) {
 	this.threeobj = new THREE.PerspectiveCamera();
 	this.threeobj.up.set(0, 0, 1);
@@ -15,6 +20,7 @@ CameraComponent.prototype.update = function (dt) {
 	if (!this.entity.has('transform')) return;
 	var transform = this.entity.get('transform');
 
+	// Copy position and rotation of the transform component
 	this.threeobj.position.copy(transform.getPosition());
 	this.threeobj.quaternion.copy(transform.getRotation());
 }

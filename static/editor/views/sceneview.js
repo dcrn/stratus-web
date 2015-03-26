@@ -1,3 +1,11 @@
+/*
+ The SceneView implements the Game Engine into the editor and
+ displays a view of the scene that is currently being edited.
+ The user can move around the scene while editing by clicking 
+ and dragging their mouse to rotate the camera, and pressing 
+ the WASD keys to move.
+*/
+
 SceneView = function() {
 	var self = this;
 	this.$el = $('<div>', {id:'scene'});
@@ -7,6 +15,7 @@ SceneView = function() {
 	this.renderer.setClearColor(0xE0E0E0);
 	this.renderer.shadowMapEnabled = true;
 
+	// Create the SceneView camera
 	this.camera = new THREE.PerspectiveCamera(75, 16/9, 0.1, 1000);
 	this.camera.position.set(0, -100, 40);
 	this.camera.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/2.5);
@@ -40,6 +49,8 @@ SceneView = function() {
 }
 
 SceneView.prototype.onKeyUp = function(e) {
+	// Listen for key release events to stop moving
+
 	ch = String.fromCharCode(e.keyCode);
 	if (ch == 'W' || ch == 'S')
 		this.move_forward = 0;
@@ -50,6 +61,8 @@ SceneView.prototype.onKeyUp = function(e) {
 }
 
 SceneView.prototype.onKeyDown = function(e) {
+	// Listen for key events to allow movement via WASD
+	// Ignore repeated key events
 	if (e.repeat) return;
 
 	ch = String.fromCharCode(e.keyCode);
@@ -69,6 +82,8 @@ SceneView.prototype.onKeyDown = function(e) {
 
 SceneView.prototype.updateMovement = function() {
 	if (!this.looking) return false;
+
+	// Apply movement while the user has their mouse down on the scene
 	
 	if (this.move_forward != 0) {
 		this.camera.position.add(
@@ -99,13 +114,16 @@ SceneView.prototype.onMouseDown = function(e) {
 	e.offsetY = e.offsetY || e.layerY;
 	window.getSelection().removeAllRanges();
 
+	// Check to see if the user clicked on a handle in the selection object
 	var handled = this.selection.onMouseDown(e.offsetX, e.offsetY);
 	if (handled) return;
 
+	// Else the user is looking around 
 	this.looking = new THREE.Vector2(e.offsetX, e.offsetY);
 }
 
 SceneView.prototype.onMouseUp = function(e) {
+	// Stop moving an object or looking
 	this.selection.onMouseUp();
 	this.looking = false;
 }
@@ -113,13 +131,19 @@ SceneView.prototype.onMouseUp = function(e) {
 SceneView.prototype.onMouseMove = function(e) {
 	e.offsetX = e.offsetX || e.layerX;
 	e.offsetY = e.offsetY || e.layerY;
+	// Update the selection object if a handle is being held onto
 	this.selection.onMouseMove(e.offsetX, e.offsetY);
+
 	if (this.looking) {
+		// Look around the scene by applying the mouse movement 
+		// 	to the angle of the camera.
+
 		var pos = new THREE.Vector2(e.offsetX, e.offsetY);
 		var delta = pos.clone();
 			delta.sub(this.looking);
 
 		this.viewyaw -= delta.x / 300;
+		// Clamp so the view can't go further than straight up or straight down
 		this.viewpitch = Math.min(Math.PI, Math.max(this.viewpitch - delta.y / 300, 0));
 
 		this.yaw.setFromAxisAngle(new Vector3(0, 0, 1), this.viewyaw);
@@ -132,16 +156,23 @@ SceneView.prototype.onMouseMove = function(e) {
 }
 
 SceneView.prototype.setData = function(d) {
+	// Load the scene data using Game.load
 	this.game = Game.load(d);
+
+	// Activate the default scene if it's available
 	if (d.config && d.config.defaultSceneID && d.config.defaultSceneID in this.game) {
 		this.game[d.config.defaultSceneID].activate();
 	}
+	// Set the clear colour on the renderer if it has been set in the game config
 	if (d.config && typeof d.config.clearColour != undefined) {
 		this.renderer.setClearColor(d.config.clearColour);
 	}
 }
 
 SceneView.prototype.setActiveScene = function(sid) {
+	// Change the currently active scene by calling scene.activate()
+	// The selection object's mesh must be added to the active scene for it to be visible
+
 	var old = Game.getActiveScene();
 	if (old) {
 		old.threeobj.remove(this.selection.getMesh());
@@ -163,6 +194,8 @@ SceneView.prototype.setActiveScene = function(sid) {
 }
 
 SceneView.prototype.setSelection = function(eid) {
+	// Change the currently selected entity on the selection object.
+
 	var sc = Game.getActiveScene();
 	if (eid && sc) {
 		var ent = sc.entities[eid];
@@ -176,6 +209,8 @@ SceneView.prototype.setSelection = function(eid) {
 }
 
 SceneView.prototype.addScene = function(sid, data) {
+	// Add an empty scene or load a scene from the specified data.
+
 	if (data) {
 		this.game[sid] = Game.loadScene(data);
 	}
@@ -185,6 +220,8 @@ SceneView.prototype.addScene = function(sid, data) {
 }
 
 SceneView.prototype.addEntity = function(sid, entid, data) {
+	// Add an empty entity or load an entity from the specified data.
+
 	var sc = this.game[sid];
 	if (!sc) return;
 	if (data) {
@@ -196,6 +233,8 @@ SceneView.prototype.addEntity = function(sid, entid, data) {
 }
 
 SceneView.prototype.addComponent = function(sid, entid, comid) {
+	// Add a component to the specified entity.
+
 	var sc = this.game[sid];
 	if (!sc) return;
 	var ent = sc.entities[entid];
@@ -231,22 +270,31 @@ SceneView.prototype.removeComponent = function(sid, entid, comid) {
 }
 
 SceneView.prototype.updateSettings = function(settings) {
+	// Update the clearColour of the renderer
+	// Called when the game settings have been modified.
+
 	if (typeof settings.clearColour != 'undefined') {
 		this.renderer.setClearColor(settings.clearColour);
 	}
 }
 
 SceneView.prototype.updateProperty = function(sid, entid, comid, options) {
+	// Update the properties on a component in the scene
+
 	var sc = this.game[sid];
 	if (!sc) return;
 	var ent = sc.entities[entid];
 	if (!ent || !ent.has(comid)) return;
 
 	Components.applyOptions(comid, ent.get(comid), options);
+
+	// Update the entity with a deltatime of 0
 	ent.update(0);
 }
 
 SceneView.prototype.updateCamera = function() {
+	// Update the projection matrix on the camera by calculating the aspect ratio
+	// 	with the width and height of the SceneView element.
 	var w = this.$el.width();
 	var h = this.$el.height();
 
@@ -256,6 +304,9 @@ SceneView.prototype.updateCamera = function() {
 }
 
 SceneView.prototype.render = function() {
+	// Render the SceneView element by appending the canvas to it and
+	//	 updating the aspect ratio on the camera.
+
 	this.$el.empty();
 	this.$el.append(this.renderer.domElement);
 	this.updateCamera();
@@ -264,19 +315,27 @@ SceneView.prototype.render = function() {
 }
 
 SceneView.prototype.update = function() {
+	// Request the next animation frame to call this function again
 	requestAnimationFrame(this.update.bind(this));
 	if (!this.game) return;
 
 	var sc = Game.getActiveScene();
 	if (!sc) return;
 
+	// Update the selection object
 	this.selection.update();
+
+	// Perform any movement
 	this.updateMovement();
 
+	// Loop through each entity in the active scene
 	for (var entid in sc.entities) {
 		var ent = sc.entities[entid];
 		var comps = ent.components();
 
+		// For each component in the entity, manually update three.js objects to
+		// 	match the position, rotation and scale of the transform component.
+		// This is necessary since the entities aren't updated like normal in the editor.
 		for (c in comps) {
 			var com = comps[c];
 			if (com && c !== 'transform' && 'threeobj' in com) {
@@ -290,6 +349,7 @@ SceneView.prototype.update = function() {
 		}
 	}
 
+	// Render the active scene using the SceneView's camera.
 	this.renderer.render(
 		sc.threeobj, 
 		this.camera

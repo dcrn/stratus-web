@@ -23,6 +23,8 @@ FlyControllerComponent = function() {
 	var mouse_last = null;
 	var dx = 0, dy = 0;
 	document.addEventListener('mousemove', function(e) {
+		// Get the difference in mouse movement between events, using the appropriate 
+		// Event property depending on if pointer lock is enabled.
 		if (Game.getPointerLockEnabled()) {
 			dx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
 			dy = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
@@ -36,15 +38,20 @@ FlyControllerComponent = function() {
 		}
 
 		self.mouse_x = self.mouse_x + dx * self.sensitivity;
+		// Lock vertical mouse movement so it can't go all the way around.
 		self.mouse_y = Math.min(Math.PI, Math.max(0, self.mouse_y + dy * self.sensitivity));
 
+		// Set up the pitch and yaw quaternions
 		self.pitch.setFromAxisAngle(self.axis_pitch, self.mouse_y);
 		self.yaw.setFromAxisAngle(self.axis_yaw, self.mouse_x);
 
+		// Apply the pitch to the yaw quaternion to create the look quaternion
+		// Doing this in the opposite order produces unwanted results
 		self.look = self.yaw.clone();
 		self.look.multiply(self.pitch);
 	});
 
+	// Listen for key events to allow movement via the WASD, Shift and Space keys.
 	var ch;
 	document.addEventListener('keydown', function(e) {
 		if (e.repeat) return;
@@ -85,8 +92,11 @@ FlyControllerComponent.prototype.update = function(dt) {
 	if (dt === 0 || !this.entity.has('transform')) return;
 	
 	var transform = this.entity.get('transform');
+	// Update the rotation of the transform based on the look quaternion
 	transform.setRotation(this.look)
 
+	// For each movement direction (forward, right, up), 
+	// 	add the position to the transform component's position
 	if (this.move_forward != 0) {
 		var p = transform.getPosition();
 

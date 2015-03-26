@@ -1,3 +1,7 @@
+/*
+ Handles the registration, properties and creation of components
+*/
+
 var Components = {
 	comps: {},
 	properties: {}
@@ -6,6 +10,7 @@ var Components = {
 Components.register = function(id, obj, props) {
 	if (!id || !obj) return false;
 
+	// Add a component with the specified ID and class
 	this.comps[id] = obj;
 	this.properties[id] = props || {};
 
@@ -13,6 +18,8 @@ Components.register = function(id, obj, props) {
 }
 
 Components.create = function(id, options) {
+	// Create a component of this type, passing in the properties for it
+	// Uses the default values if any options are missing
 	if (id in this.comps) {
 		return new this.comps[id](
 			this.getDefaults(id, options)
@@ -23,6 +30,8 @@ Components.create = function(id, options) {
 }
 
 Components.getDefaults = function(id, options, notranslate) {
+	// Get the default values for each property of this component type
+
 	options = options || {};
 	var opt = {};
 
@@ -57,6 +66,7 @@ Components.getDefaults = function(id, options, notranslate) {
 }
 
 Components.applyOptions = function(comid, comobj, options) {
+	// Apply options to the component if it has an applyOptions method
 	options = options || {};
 	if ('applyOptions' in comobj)
 		comobj.applyOptions(
@@ -65,13 +75,16 @@ Components.applyOptions = function(comid, comobj, options) {
 }
 
 Components.components = function() {
+	// Return the object containing the components by ID
 	return this.comps;
 }
 
 Components.list = function() {
+	// Return an array of component IDs
 	return Object.keys(this.comps);
 }
 
 Components.getProperties = function(id) {
+	// Get the properties for a component
 	return this.properties[id];
 }
